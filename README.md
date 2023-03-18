@@ -6,9 +6,13 @@ This project is a demonstration of the Command and Query Responsibility Segregat
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Synchronization between databases](#synchronization)
+- [CQRS Showcase](#cqrs-showcase)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Synchronization](#synchronization)
+  - [Troubleshooting](#troubleshooting)
+  - [External documentation links](#external-documentation-links)
 
 ## Installation
 
@@ -20,3 +24,9 @@ Instructions for using the project.
 
 ## Synchronization
 
+## Troubleshooting
+
+- **Error: "message error"** - If you're seeing this error message, you need to bla bla
+
+## External documentation links
+[Use the Azure Cosmos DB Emulator on Docker for Windows](https://learn.microsoft.com/en-us/azure/cosmos-db/docker-emulator-windows)
