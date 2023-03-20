@@ -1,34 +1,50 @@
-<mxfile host="app.diagrams.net" modified="2023-03-20T11:48:12.052Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="_y4-0QzaBT0ROxezpks8" version="21.0.8" type="github">
+<mxfile host="app.diagrams.net" modified="2023-03-20T12:00:47.050Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="01-vkJhRZZFDEx5bRF-3" version="21.0.8" type="github">
   <diagram id="6a731a19-8d31-9384-78a2-239565b7b9f0" name="Page-1">
     <mxGraphModel dx="1259" dy="679" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="413" pageHeight="583" background="#0079F5" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2085" value="Database for read" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/databases/Azure_Cosmos_DB.svg;" vertex="1" parent="1">
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2085" value="Database for read" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/databases/Azure_Cosmos_DB.svg;" parent="1" vertex="1">
           <mxGeometry x="603" y="238" width="64" height="64" as="geometry" />
         </mxCell>
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2088" value="&lt;font face=&quot;Tahoma&quot;&gt;Domain Model (Write Model)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+        <mxCell id="NSMJBN_e0fo4ytpCGNTQ-4" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.15;entryY=0.05;entryDx=0;entryDy=0;entryPerimeter=0;curved=1;" edge="1" parent="1" source="-VKRcfKKGnfU7Yh5SjRk-2088" target="-VKRcfKKGnfU7Yh5SjRk-2112">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NSMJBN_e0fo4ytpCGNTQ-5" value="2) Domain event raised&lt;br&gt;and put on queue" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="NSMJBN_e0fo4ytpCGNTQ-4">
+          <mxGeometry x="-0.32" y="-12" relative="1" as="geometry">
+            <mxPoint x="3" y="19" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2088" value="&lt;font face=&quot;Tahoma&quot;&gt;Domain Model (Write Model)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
           <mxGeometry x="305" y="166" width="86" height="86" as="geometry" />
         </mxCell>
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2089" value="Database for write" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/databases/SQL_Server.svg;" vertex="1" parent="1">
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2089" value="Database for write" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/databases/SQL_Server.svg;" parent="1" vertex="1">
           <mxGeometry x="245" y="340" width="68" height="68" as="geometry" />
         </mxCell>
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2092" value="Application Service" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="308" y="102" width="203" height="34" as="geometry" />
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2092" value="Application Service" style="whiteSpace=wrap;strokeWidth=2;" parent="1" vertex="1">
+          <mxGeometry x="251" y="95" width="325" height="34" as="geometry" />
         </mxCell>
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2094" value="Client" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="353" y="31" width="129" height="25" as="geometry" />
+        <mxCell id="NSMJBN_e0fo4ytpCGNTQ-1" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.004;entryY=0.372;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=default;curved=1;" edge="1" parent="1" source="-VKRcfKKGnfU7Yh5SjRk-2094" target="-VKRcfKKGnfU7Yh5SjRk-2088">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2111" value="&lt;font face=&quot;Tahoma&quot;&gt;View Model (Read Model)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+        <mxCell id="NSMJBN_e0fo4ytpCGNTQ-2" value="1) Initiate business task" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="NSMJBN_e0fo4ytpCGNTQ-1">
+          <mxGeometry x="-0.194" y="12" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2094" value="Client" style="whiteSpace=wrap;strokeWidth=2;" parent="1" vertex="1">
+          <mxGeometry x="349" y="32" width="129" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2111" value="&lt;font face=&quot;Tahoma&quot;&gt;View Model (Read Model)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
           <mxGeometry x="435" y="166" width="86" height="86" as="geometry" />
         </mxCell>
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2112" value="Message Queue" style="shape=datastore;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="422" y="292" width="60" height="60" as="geometry" />
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2112" value="Message Queue" style="shape=datastore;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="421" y="302" width="60" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2113" value="Database for read" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/databases/Azure_Cosmos_DB.svg;" vertex="1" parent="1">
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2113" value="Database for read" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/databases/Azure_Cosmos_DB.svg;" parent="1" vertex="1">
           <mxGeometry x="603" y="136" width="64" height="64" as="geometry" />
         </mxCell>
-        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2114" value="Repository" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+        <mxCell id="-VKRcfKKGnfU7Yh5SjRk-2114" value="Repository" style="whiteSpace=wrap;strokeWidth=2;" parent="1" vertex="1">
           <mxGeometry x="239" y="299" width="129" height="25" as="geometry" />
         </mxCell>
       </root>
