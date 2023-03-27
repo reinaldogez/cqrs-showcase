@@ -24,6 +24,8 @@ Instructions for using the project.
 
 ## Synchronization
 
+I created this topic on the discussion tab [Updating Read Databases in a CQRS Architecture](https://github.com/reinaldogez/cqrs-showcase/discussions/1), where the main options are deeply discussed.
+
 ## Troubleshooting
 
 - **Error: "message error"** - If you're seeing this error message, you need to bla bla
