@@ -31,4 +31,4 @@ I created this topic on the discussion tab [Updating Read Databases in a CQRS Ar
 - **Error: "message error"** - If you're seeing this error message, you need to bla bla
 
 ## External documentation links
-[Use the Azure Cosmos DB Emulator on Docker for Windows](https://learn.microsoft.com/en-us/azure/cosmos-db/docker-emulator-windows)
+[Use the Azure Cosmos DB Emulator on Docker for Linux](https://learn.microsoft.com/en-us/azure/cosmos-db/docker-emulator-linux)

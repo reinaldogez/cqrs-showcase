@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE user (
     id INT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
@@ -10,5 +10,5 @@ CREATE TABLE user_logs (
     user_id INT NOT NULL,
     action VARCHAR(255) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
