@@ -3,19 +3,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using CqrsShowCase.Infrastructure.Data;
 
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
-    {
-        services.AddDbContext<CqrsShowCaseDbContext>();
-    })
-    .Build();
+var services = new ServiceCollection();
+services.AddDbContext<CqrsShowCaseDbContext>();
 
-using var scope = host.Services.CreateScope();
-var services = scope.ServiceProvider;
+var serviceProvider = services.BuildServiceProvider();
+
 try
 {
-    var context = services.GetRequiredService<CqrsShowCaseDbContext>();
-    context.Database.EnsureCreated();
+    var dbContext = serviceProvider.GetRequiredService<CqrsShowCaseDbContext>();
+    dbContext.Database.EnsureCreated();
 }
 catch (Exception ex)
 {
