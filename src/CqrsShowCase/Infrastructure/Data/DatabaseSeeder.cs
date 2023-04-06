@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Bogus;
-using CqrsShowCase.Domain;
+using CqrsShowCase.Command.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -31,7 +31,6 @@ public static class DatabaseSeeder
 
         try
         {
-            //using (var dbContext = new CqrsShowCaseDbContext())
             {
                 var users = new Faker<User>()
                     .RuleFor(u => u.Name, f => f.Name.FullName())
@@ -43,11 +42,8 @@ public static class DatabaseSeeder
                         .Generate(f.Random.Number(1, 10)))
                     .Generate(10000);
 
-                // Save the users to the database
-                foreach (var user in users)
-                {
-                    dbContext.Users.Add(user);
-                }
+
+                dbContext.Users.AddRange(users);
                 dbContext.SaveChanges();
             }
         }

@@ -1,4 +1,4 @@
-using CqrsShowCase.Domain;
+using CqrsShowCase.Command.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 

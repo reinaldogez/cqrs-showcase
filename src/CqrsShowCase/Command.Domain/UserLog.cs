@@ -1,4 +1,4 @@
-namespace CqrsShowCase.Domain;
+namespace CqrsShowCase.Command.Domain;
 
 public class UserLog
 {
