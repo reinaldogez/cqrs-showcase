@@ -20,11 +20,9 @@ try
 {
     var dbContext = serviceProvider.GetRequiredService<CqrsShowCaseDbContext>();
     dbContext.Database.EnsureCreated();
+    DatabaseSeeder.Seed(serviceProvider);
 }
 catch (Exception ex)
 {
     Console.WriteLine("An error occurred while creating the database: " + ex.Message);
 }
-
-//Console.WriteLine("Press any key to exit...");
-//Console.ReadKey();
