@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/CqrsShowCase/UserInterface/Cli/CqrsShowCase.UserInterface.Cli.csproj",
+                "${workspaceFolder}/src/CqrsShowCase/UserInterface/CommandApi/CqrsShowCase.UserInterface.CommandApi.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/src/CqrsShowCase/UserInterface/Cli/CqrsShowCase.UserInterface.Cli.csproj",
+                "${workspaceFolder}/src/CqrsShowCase/UserInterface/CommandApi/CqrsShowCase.UserInterface.CommandApi.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/src/CqrsShowCase/UserInterface/Cli/CqrsShowCase.UserInterface.Cli.csproj"
+                "${workspaceFolder}/src/CqrsShowCase/UserInterface/CommandApi/CqrsShowCase.UserInterface.CommandApi.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

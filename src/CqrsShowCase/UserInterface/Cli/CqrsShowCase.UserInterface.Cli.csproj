@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Domain\CqrsShowCase.Domain.csproj" />
+    <ProjectReference Include="..\..\Command.Domain\CqrsShowCase.Command.Domain.csproj" />
     <ProjectReference Include="..\..\Infrastructure\CqrsShowCase.Infrastructure.csproj" />
   </ItemGroup>
 
