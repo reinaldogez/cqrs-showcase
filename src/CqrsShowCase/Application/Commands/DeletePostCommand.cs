@@ -1,4 +1,6 @@
-namespace CqrsShowCase.Command.Domain.Commands;
+using CqrsShowCase.Command.Domain;
+
+namespace CqrsShowCase.Application.Commands;
 
 public class DeletePostCommand : BaseCommand
 {

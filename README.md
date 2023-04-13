@@ -10,6 +10,7 @@ This project is a demonstration of the Command and Query Responsibility Segregat
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Usage](#usage)
+  - [Domain-Driven Design](#domain-driven-design)
   - [Synchronization](#synchronization)
   - [Troubleshooting](#troubleshooting)
   - [External documentation links](#external-documentation-links)
@@ -21,6 +22,10 @@ Instructions for installing the project.
 ## Usage
 
 Instructions for using the project.
+
+## Domain-Driven Design
+In DDD, a bounded context defines a specific problem area within a domain and may correspond to a separate microservice. For example, in the context of a social media application, a bounded context could be defined for post-related functions. This bounded context could then be implemented as a social media post microservice, which would handle all the functions related to creating, managing, and displaying posts.
+In our showcase project, I will design and implement a social media post microservice using the CQRS pattern to handle all post-related functions, such as creating, editing, and displaying posts. By using CQRS, we can optimize the performance of the microservice and achieve scalability, flexibility, and maintainability in our application architecture.
 
 ## Synchronization
 
