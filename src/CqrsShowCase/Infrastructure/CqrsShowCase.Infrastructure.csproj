@@ -2,6 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Command.Domain\CqrsShowCase.Command.Domain.csproj"/>
     <ProjectReference Include="..\Application\CqrsShowCase.Application.csproj"/>
+    <ProjectReference Include="..\Core\CqrsShowCase.Core.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Bogus" Version="34.0.2"/>

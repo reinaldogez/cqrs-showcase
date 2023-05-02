@@ -1,4 +1,4 @@
-namespace CqrsShowCase.Application.Events;
+namespace CqrsShowCase.Core.Events;
 
 public abstract class BaseEvent
 {

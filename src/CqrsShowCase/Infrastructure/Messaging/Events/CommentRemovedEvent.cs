@@ -1,4 +1,4 @@
-using CqrsShowCase.Application.Events;
+using CqrsShowCase.Core.Events;
 
 namespace CqrsShowCase.Infrastructure.Messaging.Events;
 

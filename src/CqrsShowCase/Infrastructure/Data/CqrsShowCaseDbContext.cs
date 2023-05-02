@@ -7,8 +7,7 @@ namespace CqrsShowCase.Infrastructure.Data;
 public class CqrsShowCaseDbContext : DbContext
 {
     private readonly string _connectionString;
-    public DbSet<User> Users { get; set; }
-    public DbSet<UserLog> UserLogs { get; set; }
+    //public DbSet<User> Users { get; set; }
 
     public CqrsShowCaseDbContext(IConfiguration configuration)
     {
