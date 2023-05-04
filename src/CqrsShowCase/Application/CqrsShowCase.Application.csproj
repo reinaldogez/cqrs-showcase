@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Command.Domain\CqrsShowCase.Command.Domain.csproj" />
+    <ProjectReference Include="..\Core\CqrsShowCase.Core.csproj" />
   </ItemGroup>
 </Project>

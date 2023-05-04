@@ -1,6 +1,4 @@
-using CqrsShowCase.Core.Events;
-
-namespace CqrsShowCase.Infrastructure.Messaging.Events;
+namespace CqrsShowCase.Core.Events;
 
 public class CommentAddedEvent : BaseEvent
 {

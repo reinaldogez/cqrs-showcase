@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using Confluent.Kafka;
-using CqrsShowCase.Application.EventHandlers;
+using CqrsShowCase.Application.Handlers;
 using CqrsShowCase.Core.Events;
 using Post.Query.Infrastructure.Converters;
 

@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CqrsShowCase.Core.Events;
-using CqrsShowCase.Infrastructure.Messaging.Events;
 
 namespace Post.Query.Infrastructure.Converters
 {
