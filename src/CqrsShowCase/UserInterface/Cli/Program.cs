@@ -12,15 +12,14 @@ var configuration = builder.Build();
 
 var services = new ServiceCollection();
 services.AddSingleton<IConfiguration>(configuration);
-services.AddDbContext<CqrsShowCaseDbContext>();
 
 var serviceProvider = services.BuildServiceProvider();
 
 try
 {
-    var dbContext = serviceProvider.GetRequiredService<CqrsShowCaseDbContext>();
-    dbContext.Database.EnsureCreated();
-    DatabaseSeeder.Seed(serviceProvider);
+    // var dbContext = serviceProvider.GetRequiredService<CqrsShowCaseDbContext>();
+    // dbContext.Database.EnsureCreated();
+    // DatabaseSeeder.Seed(serviceProvider);
 }
 catch (Exception ex)
 {

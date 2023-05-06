@@ -1,0 +1,14 @@
+[
+    {
+      "Name": "Post",
+      "PartitionKeyPath": "/id",
+      "Throughput" : 20000,
+      "IndexingMode": "consistent"
+    },
+    {
+      "Name": "Comment",
+      "PartitionKeyPath": "/id",
+      "IndexingMode": "consistent",
+      "Throughput" : 20000
+    }
+  ]
