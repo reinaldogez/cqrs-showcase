@@ -16,7 +16,6 @@ public class AzureCosmosDbTestFixture : IAsyncLifetime, IDisposable
     public CosmosDbSettings cosmosDbSettings { get; private set; }
     public string TestContainerName { get; } = "TestContainer";
     public string TestPartitionKey { get; } = "/id";
-
     private async Task InitializeTestDatabaseAsync()
     {
         await cosmosClient.CreateDatabaseIfNotExistsAsync(cosmosDbSettings.DatabaseName);
@@ -44,10 +43,10 @@ public class AzureCosmosDbTestFixture : IAsyncLifetime, IDisposable
         await InitializeTestDatabaseAsync();
     }
 
-    public Task DisposeAsync()
+    public async Task DisposeAsync()
     {
-        Dispose();
-        return Task.CompletedTask;
+        await CleanUpTestDatabaseAsync();
+        ServiceProvider.Dispose();
     }
     public async Task CleanUpTestDatabaseAsync()
     {
@@ -64,7 +63,5 @@ public class AzureCosmosDbTestFixture : IAsyncLifetime, IDisposable
 
     public void Dispose()
     {
-        CleanUpTestDatabaseAsync().GetAwaiter().GetResult();
-        ServiceProvider.Dispose();
     }
 }
