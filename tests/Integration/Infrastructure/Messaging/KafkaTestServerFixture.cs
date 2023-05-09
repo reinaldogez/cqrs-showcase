@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace PocKafka.Tests.Integration;
+namespace CqrsShowCase.Tests.Integration.Infrasctructure.Messaging;
 
 public class KafkaTestServerFixture : IAsyncLifetime, IDisposable
 {
@@ -24,7 +24,6 @@ public class KafkaTestServerFixture : IAsyncLifetime, IDisposable
         try
         {
             var services = new ServiceCollection();
-            string basePath = AppContext.BaseDirectory;
             ProducerConfig configProducer = await ConfigFiles.LoadConfig<ProducerConfig>("Infrastructure\\Messaging\\Config\\kafkaproducer.config");
             ConsumerConfig configConsumer = await ConfigFiles.LoadConfig<ConsumerConfig>("Infrastructure\\Messaging\\Config\\kafkaconsumer.config");
             if (configProducer == null || configConsumer == null)

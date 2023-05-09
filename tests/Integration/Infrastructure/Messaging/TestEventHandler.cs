@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using CqrsShowCase.Application.Handlers;
 using CqrsShowCase.Core.Events;
 
-namespace PocKafka.Tests.Integration;
+namespace CqrsShowCase.Tests.Integration.Infrasctructure.Messaging;
 
 public class TestEventHandler : IEventHandler
 {

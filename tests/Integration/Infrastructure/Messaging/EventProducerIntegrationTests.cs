@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PocKafka.Tests.Integration;
+namespace CqrsShowCase.Tests.Integration.Infrasctructure.Messaging;
 
 public class EventProducerIntegrationTests : IClassFixture<KafkaTestServerFixture>
 {
