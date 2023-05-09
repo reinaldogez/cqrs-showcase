@@ -14,11 +14,6 @@ public class KafkaTestServerFixture : IAsyncLifetime, IDisposable
 {
     public ServiceProvider ServiceProvider { get; private set; }
 
-    public void Dispose()
-    {
-        ServiceProvider.Dispose();
-    }
-
     public async Task InitializeAsync()
     {
         try
@@ -47,5 +42,10 @@ public class KafkaTestServerFixture : IAsyncLifetime, IDisposable
     {
         Dispose();
         return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        ServiceProvider.Dispose();
     }
 }

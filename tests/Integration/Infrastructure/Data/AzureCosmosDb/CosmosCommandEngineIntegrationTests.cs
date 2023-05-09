@@ -14,8 +14,7 @@ public class CosmosCommandEngineIntegrationTests : IClassFixture<AzureCosmosDbTe
     public CosmosCommandEngineIntegrationTests(AzureCosmosDbTestFixture fixture)
     {
         _fixture = fixture;
-        _cosmosClient = fixture.CosmosClient;
-
+        _cosmosClient = fixture.cosmosClient;
         _cosmosCommandEngine = new CosmosCommandEngine(_cosmosClient);
     }
 
@@ -23,10 +22,10 @@ public class CosmosCommandEngineIntegrationTests : IClassFixture<AzureCosmosDbTe
     public async Task InsertItemAsync_ShouldInsertNewItem()
     {
         // Arrange
-        var testItem = new { id = "1", name = "TestItem", partitionKey = "TestPartitionKey" };
+        var testItem = new { id = "1", name = "TestItem", partitionKey = "1" };
 
         // Act
-        var (insertedItem, requestCharge, errorMessage) = await _cosmosCommandEngine.InsertItemAsync(testItem, _fixture.TestDatabaseName, _fixture.TestContainerName, testItem.partitionKey);
+        var (insertedItem, requestCharge, errorMessage) = await _cosmosCommandEngine.InsertItemAsync(testItem, _fixture.cosmosDbSettings.DatabaseName, _fixture.TestContainerName, testItem.partitionKey);
 
         // Assert
         Assert.Equal(testItem.id, insertedItem.id);

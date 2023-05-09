@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using CqrsShowCase.Infrastructure.Data.AzureCosmosDb.Configuration;
 using Microsoft.Azure.Cosmos;
@@ -11,26 +12,15 @@ namespace CqrsShowCase.Tests.Integration.Infrasctructure.Data.AzureCosmosDb;
 public class AzureCosmosDbTestFixture : IAsyncLifetime, IDisposable
 {
     public ServiceProvider ServiceProvider { get; private set; }
-    public CosmosClient CosmosClient { get; }
-    CosmosDbSettings cosmosDbSettings { get; }
-    public string TestDatabaseName { get; } = "TestDatabase";
+    public CosmosClient cosmosClient { get; private set; }
+    public CosmosDbSettings cosmosDbSettings { get; private set; }
     public string TestContainerName { get; } = "TestContainer";
     public string TestPartitionKey { get; } = "/id";
 
     private async Task InitializeTestDatabaseAsync()
     {
-        await CosmosClient.CreateDatabaseIfNotExistsAsync(TestDatabaseName);
-        await CosmosClient.GetDatabase(TestDatabaseName).CreateContainerIfNotExistsAsync(TestContainerName, TestPartitionKey);
-    }
-
-    public async Task CleanUpTestDatabaseAsync()
-    {
-        await CosmosClient.GetDatabase(TestDatabaseName).DeleteAsync();
-    }
-
-    public void Dispose()
-    {
-        CleanUpTestDatabaseAsync().GetAwaiter().GetResult();
+        await cosmosClient.CreateDatabaseIfNotExistsAsync(cosmosDbSettings.DatabaseName);
+        await cosmosClient.GetDatabase(cosmosDbSettings.DatabaseName).CreateContainerIfNotExistsAsync(TestContainerName, TestPartitionKey);
     }
 
     public async Task InitializeAsync()
@@ -39,8 +29,18 @@ public class AzureCosmosDbTestFixture : IAsyncLifetime, IDisposable
             .AddJsonFile("appsettings.json")
             .Build();
 
-        CosmosDbSettings cosmosDbSettings = new CosmosDbSettings();
+        cosmosDbSettings = new CosmosDbSettings();
         configuration.Bind("CosmosDbSettings", cosmosDbSettings);
+
+        var services = new ServiceCollection();
+        CosmosClientOptions cosmosClientOptions = new CosmosClientOptions
+        {
+            AllowBulkExecution = true
+        };
+        services.AddSingleton(s => new CosmosClient(cosmosDbSettings.EndpointUri, cosmosDbSettings.PrimaryKey, cosmosClientOptions));
+        ServiceProvider = services.BuildServiceProvider();
+
+        cosmosClient = ServiceProvider.GetService<CosmosClient>();
         await InitializeTestDatabaseAsync();
     }
 
@@ -48,5 +48,23 @@ public class AzureCosmosDbTestFixture : IAsyncLifetime, IDisposable
     {
         Dispose();
         return Task.CompletedTask;
+    }
+    public async Task CleanUpTestDatabaseAsync()
+    {
+        try
+        {
+            await cosmosClient.GetDatabase(cosmosDbSettings.DatabaseName).DeleteAsync();
+        }
+        catch (CosmosException ce)
+        {
+            Exception baseException = ce.GetBaseException();
+            Debug.WriteLine($"Exception: Status code {ce.StatusCode}. Exception during deleting database: {cosmosDbSettings.DatabaseName}.\nException details: {ce}");
+        }
+    }
+
+    public void Dispose()
+    {
+        CleanUpTestDatabaseAsync().GetAwaiter().GetResult();
+        ServiceProvider.Dispose();
     }
 }
