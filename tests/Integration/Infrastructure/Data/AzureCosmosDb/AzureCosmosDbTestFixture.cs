@@ -30,6 +30,7 @@ public class AzureCosmosDbTestFixture : IAsyncLifetime, IDisposable
 
         cosmosDbSettings = new CosmosDbSettings();
         configuration.Bind("CosmosDbSettings", cosmosDbSettings);
+        cosmosDbSettings.PrimaryKey = Environment.GetEnvironmentVariable("CosmosDbSettings__PrimaryKey",  EnvironmentVariableTarget.User);
 
         var services = new ServiceCollection();
         CosmosClientOptions cosmosClientOptions = new CosmosClientOptions

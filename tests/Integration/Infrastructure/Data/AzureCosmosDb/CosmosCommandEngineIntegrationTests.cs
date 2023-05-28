@@ -58,4 +58,21 @@ public class CosmosCommandEngineIntegrationTests : IClassFixture<AzureCosmosDbTe
             async () => await container.ReadItemAsync<dynamic>(testItem.id, new PartitionKey(testItem.partitionKey)));
         Assert.Equal(System.Net.HttpStatusCode.NotFound, exception.StatusCode);
     }
+
+    [Fact]
+    public async Task UpdateItemAsync_ShouldUpdateItem(){
+        // Arrange
+        var testItem = new { id = "1", name = "TestItem", partitionKey = "1" };
+        await _cosmosCommandEngine.InsertItemAsync(testItem, _fixture.cosmosDbSettings.DatabaseName, _fixture.TestContainerName, testItem.partitionKey);
+        
+        var updatedItem = new { id = "1", name = "UpdatedItem", partitionKey = "1" };
+
+        // Act
+        var (returnedItem, requestCharge, errorMessage) = await _cosmosCommandEngine.UpdateItemAsync(updatedItem, _fixture.cosmosDbSettings.DatabaseName, _fixture.TestContainerName, testItem.partitionKey);
+
+        // Assert
+        Assert.Equal(updatedItem.name, returnedItem.name);
+        Assert.True(requestCharge > 0);
+        Assert.Empty(errorMessage);
+    }
 }

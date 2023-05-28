@@ -45,7 +45,7 @@ public class CosmosCommandEngine
         try
         {
             Container container = _cosmosClient.GetContainer(databaseName, containerName);
-            string itemId = typeof(T).GetProperty("Id").GetValue(item).ToString();
+            string itemId = typeof(T).GetProperty("id").GetValue(item).ToString();
             ItemResponse<T> response = await container.ReplaceItemAsync<T>(item, itemId, new PartitionKey(partitionKeyValue));
             double totalRequestCharge = response.RequestCharge;
             return (response.Resource, totalRequestCharge, string.Empty);

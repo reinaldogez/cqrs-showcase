@@ -3,7 +3,7 @@
 ![CQRS Arquitecture image](images/cqrs_show_case_architecture_diagram.svg)
 
 This project is a demonstration of the Command and Query Responsibility Segregation (CQRS) pattern using .NET 6. The showcase application uses Azure Cosmos DB Emulator as the read database and MongoDB as the write database. To ensure eventual consistency between the read and write databases, Kafka is utilized as an event-driven synchronization mechanism. By integrating Kafka into the architecture, the system can effectively propagate updates and synchronize data across the databases in an asynchronous and scalable manner.
-The project includes sample code for implementing CQRS in a .NET application, along with instructions for setting up the required databases and deploying the application. This showcase can serve as a starting point for developers who are interested in implementing the CQRS pattern in their .NET applications using Cosmos DB and SQL Server.
+The project includes sample code for implementing CQRS in a .NET application, along with instructions for setting up the required databases and deploying the application. This showcase can serve as a starting point for developers who are interested in implementing the CQRS pattern in their .NET applications.
 
 In this showcase project, I will design and implement a social media post microservice using the CQRS pattern to handle all post-related functions, such as creating, editing, and displaying posts. By using CQRS, we can optimize the performance of the microservice and achieve scalability, flexibility, and maintainability in our application architecture.
 
@@ -12,6 +12,7 @@ In this showcase project, I will design and implement a social media post micros
 - [CQRS Showcase](#cqrs-showcase)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
+    - [Set Azure Cosmos DB Emulator Primary Key as Environment Variable](#set-azure-cosmos-db-emulator-primary-key-as-environment-variable)
   - [Usage](#usage)
   - [Domain-Driven Design](#domain-driven-design)
     - [Bounded Context](#bounded-context)
@@ -23,6 +24,13 @@ In this showcase project, I will design and implement a social media post micros
 ## Installation
 
 Instructions for installing the project.
+
+### Set Azure Cosmos DB Emulator Primary Key as Environment Variable
+
+Open a powershell terminal in as Administrator and run the following command:
+```ps1
+setx CosmosDbSettings__PrimaryKey "your primary key"
+```
 
 ## Usage
 
