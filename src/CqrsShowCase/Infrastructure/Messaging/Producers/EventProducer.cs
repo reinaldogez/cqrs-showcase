@@ -1,10 +1,11 @@
 using System.Text.Json;
 using Confluent.Kafka;
+using CqrsShowCase.Core.Producers;
 using CqrsShowCase.Core.Events;
 
 namespace CqrsShowCase.Infrastructure.Messaging.Consumers;
 
-public class EventProducer
+public class EventProducer : IEventProducer
 {
     private readonly ProducerConfig _config;
 

@@ -13,6 +13,8 @@ In this showcase project, I will design and implement a social media post micros
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
     - [Set Azure Cosmos DB Emulator Primary Key as Environment Variable](#set-azure-cosmos-db-emulator-primary-key-as-environment-variable)
+    - [Set Kafka Topic Name as Environment Variable](#set-kafka-topic-name-as-environment-variable)
+    - [Run Apache Kafka with Docker Compose](#run-apache-kafka-with-docker-compose)
   - [Usage](#usage)
   - [Domain-Driven Design](#domain-driven-design)
     - [Bounded Context](#bounded-context)
@@ -31,6 +33,20 @@ Open a powershell terminal in as Administrator and run the following command:
 ```ps1
 setx CosmosDbSettings__PrimaryKey "your primary key"
 ```
+
+### Set Kafka Topic Name as Environment Variable
+
+Open a powershell terminal in as Administrator and run the following command:
+```ps1
+setx KAFKA_TOPIC "SocialMediaSyncQueueEvents"
+```
+### Run Apache Kafka with Docker Compose
+
+Open a powershell terminal in as Administrator and run the following command:
+```ps1
+docker-compose -f docker-compose-apache-kafka.yaml up -d
+```
+
 
 ## Usage
 

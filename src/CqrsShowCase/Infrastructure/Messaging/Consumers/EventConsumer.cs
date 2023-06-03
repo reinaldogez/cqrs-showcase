@@ -2,12 +2,13 @@ using System.Reflection;
 using System.Text.Json;
 using Confluent.Kafka;
 using CqrsShowCase.Application.Handlers;
+using CqrsShowCase.Core.Consumers;
 using CqrsShowCase.Core.Events;
 using Post.Query.Infrastructure.Converters;
 
 namespace CqrsShowCase.Infrastructure.Messaging.Consumers;
 
-public class EventConsumer
+public class EventConsumer : IEventConsumer
 {
     private readonly ConsumerConfig _config;
     private readonly IEventHandler _eventHandler;

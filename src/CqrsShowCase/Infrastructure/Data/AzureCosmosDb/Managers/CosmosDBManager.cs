@@ -14,6 +14,7 @@ public class CosmosDBManager
     {
         _cosmosClient = cosmosClient;
     }
+    
     public async Task<bool> CheckConnection()
     {
         Console.WriteLine("Testing Connection...\n");

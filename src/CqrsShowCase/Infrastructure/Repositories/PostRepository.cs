@@ -1,13 +1,26 @@
+using CqrsShowCase.Infrastructure.Data.AzureCosmosDb.Configuration;
+using CqrsShowCase.Infrastructure.Data.AzureCosmosDb.Managers;
 using CqrsShowCase.Query.Domain.Entities;
 using CqrsShowCase.Query.Domain.Repositories;
+using Microsoft.Extensions.Configuration;
 
 namespace CqrsShowCase.Infrastructure.Repositories;
 
 public class PostRepository : IPostRepository
 {
-    public Task CreateAsync(PostEntity post)
+    const string ContainerName = "Post";
+    private readonly IConfiguration _configuration;
+    private readonly CosmosCommandEngine _cosmosCommandEngine;
+
+    public PostRepository(IConfiguration configuration, CosmosCommandEngine cosmosCommandEngine)
     {
-        throw new NotImplementedException();
+        _configuration = configuration;
+        _cosmosCommandEngine = cosmosCommandEngine;
+    }
+    public async Task CreateAsync(PostEntity post)
+    {
+        await _cosmosCommandEngine.InsertItemAsync(post, CosmosExtensions._cosmosDbSettings.DatabaseName,
+            ContainerName, post.PostId.ToString());
     }
 
     public Task DeleteAsync(Guid postId)
