@@ -41,14 +41,12 @@ public static class CosmosExtensions
     }
     public async static Task CreateProjectContainers(this CosmosDBManager cosmosDBManager)
     {
-        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
         if (_cosmosDbSettings != null)
         {
             string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string filePath = Path.Combine(assemblyFolder, "cosmosdb-query-containers-config.json");
             List<ContainerInfo> queryMassiveContainers = JsonUtils.GetContainersFromJsonFile(filePath);
             await cosmosDBManager.CreateContainersList(queryMassiveContainers, _cosmosDbSettings.DatabaseName);
-
         }
         else
         {

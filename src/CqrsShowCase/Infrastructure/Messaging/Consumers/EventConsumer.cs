@@ -33,11 +33,15 @@ public class EventConsumer : IEventConsumer
             while (!cancellationToken.IsCancellationRequested)
             {
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
-                Console.WriteLine("Consumer Started");
+                Console.WriteLine("Consumer Iterating");
                 Console.ResetColor();
                 var consumeResult = consumer.Consume(TimeSpan.FromSeconds(3));
 
                 if (consumeResult?.Message == null) continue;
+
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("Consumer received message");
+                Console.ResetColor();
 
                 var options = new JsonSerializerOptions { Converters = { new EventJsonConverter() } };
                 var @event = JsonSerializer.Deserialize<BaseEvent>(consumeResult.Message.Value, options);

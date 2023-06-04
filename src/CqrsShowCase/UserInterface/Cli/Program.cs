@@ -51,8 +51,13 @@ var cosmosDBManager = serviceProvider.GetRequiredService<CosmosDBManager>();
 await cosmosDBManager.CheckAndCreateDatabase();
 await cosmosDBManager.CreateProjectContainers();
 
-using CancellationTokenSource timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 CancellationTokenSource cts = new CancellationTokenSource();
+
+Console.CancelKeyPress += (s, e) =>
+{
+    e.Cancel = true;
+    cts.Cancel();
+};
 Task consumerTask = null;
 try
 {
@@ -62,7 +67,7 @@ try
     consumerTask = Task.Run(() => eventConsumer.Consume(topicName, cts.Token));
     var eventStore = serviceProvider.GetRequiredService<IEventStore>();
     CreateAndPostEventOnEventStore(eventStore);
-    await Task.Delay(10000);
+    await consumerTask;
 }
 catch (TaskCanceledException ex)
 {
