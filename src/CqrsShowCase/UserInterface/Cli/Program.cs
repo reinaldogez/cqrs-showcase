@@ -12,6 +12,8 @@ using CqrsShowCase.Core.Producers;
 using CqrsShowCase.Core.Events;
 using CqrsShowCase.Query.Domain.Repositories;
 using CqrsShowCase.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
+using CqrsShowCase.Infrastructure.Data.MsSqlServer.DataAccess;
 
 var builder = new ConfigurationBuilder()
     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -21,6 +23,16 @@ var configuration = builder.Build();
 
 var services = new ServiceCollection();
 services.AddSingleton<IConfiguration>(configuration);
+
+var connectionStringTemplate = configuration.GetConnectionString("SqlServer");
+var password = Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD") ?? "defaultPassword";
+// Replace a placeholder in the connection string template with the actual password.
+var connectionString = connectionStringTemplate.Replace("{PASSWORD}", password);
+
+Action<DbContextOptionsBuilder> configureDbContext = (o => o.UseLazyLoadingProxies().UseSqlServer(connectionString));
+services.AddDbContext<DatabaseContext>(configureDbContext);
+services.AddSingleton<DatabaseContextFactory>(new DatabaseContextFactory(configureDbContext));
+
 services.AddScoped<IEventStore, EventStore>();
 services.AddScoped<IEventHandler, CqrsShowCase.Infrastructure.Handlers.EventHandler>();
 

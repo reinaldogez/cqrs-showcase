@@ -14,6 +14,8 @@ In this showcase project, I will design and implement a social media post micros
   - [Installation](#installation)
     - [Set Kafka Topic Name as Environment Variable](#set-kafka-topic-name-as-environment-variable)
     - [Run Apache Kafka with Docker Compose](#run-apache-kafka-with-docker-compose)
+    - [Set SQL Server Password as Environment Variable](#set-sql-server-password-as-environment-variable)
+    - [Creating .env File for Docker Compose](#creating-env-file-for-docker-compose)
   - [Usage](#usage)
   - [Domain-Driven Design](#domain-driven-design)
     - [Bounded Context](#bounded-context)
@@ -37,6 +39,23 @@ Open a powershell terminal in as Administrator and run the following command:
 docker-compose -f docker-compose-apache-kafka.yaml up -d
 ```
 
+### Set SQL Server Password as Environment Variable
+
+Open a powershell terminal in as Administrator and run the following command:
+```ps1
+setx SQLSERVER_PASSWORD "YourStrongPasswordHere"
+```
+
+### Creating .env File for Docker Compose
+
+For Docker Compose to up the SQL Server with the necessary environment variables, create a .env file in the root directory of your project. This file should contain the SQL Server password that the Docker container will use:
+
+```
+# .env file
+SA_PASSWORD=YourStrongPasswordHere
+```
+
+Replace YourStrongPasswordHere with your actual SQL Server password. This file will be read by Docker Compose, as specified in your docker-compose.yml, to set the password for SQL Server within the container.
 
 ## Usage
 

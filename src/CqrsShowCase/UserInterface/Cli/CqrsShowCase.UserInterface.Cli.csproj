@@ -20,9 +20,6 @@
     <Content Include="..\..\Infrastructure\Messaging\Config\*.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\Infrastructure\Data\AzureCosmosDb\Configuration\cosmosdb-query-containers-config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>    
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">
