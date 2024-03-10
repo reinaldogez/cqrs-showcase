@@ -6,8 +6,6 @@ using CqrsShowCase.Infrastructure.Stores;
 using CqrsShowCase.Infrastructure.Messaging.Consumers;
 using Confluent.Kafka;
 using CqrsShowCase.Infrastructure.Messaging.Config;
-using CqrsShowCase.Infrastructure.Data.AzureCosmosDb.Managers;
-using CqrsShowCase.Infrastructure.Data.AzureCosmosDb.Configuration;
 using CqrsShowCase.Application.Handlers;
 using CqrsShowCase.Core.Consumers;
 using CqrsShowCase.Core.Producers;
@@ -26,10 +24,6 @@ services.AddSingleton<IConfiguration>(configuration);
 services.AddScoped<IEventStore, EventStore>();
 services.AddScoped<IEventHandler, CqrsShowCase.Infrastructure.Handlers.EventHandler>();
 
-services.AddCosmosClient(configuration);
-services.AddScoped<CosmosDBManager>();
-services.AddScoped<CosmosCommandEngine>();
-
 ProducerConfig configProducer = await ConfigFiles.LoadConfig<ProducerConfig>(@"..\..\Infrastructure\Messaging\Config\kafkaproducer.config");
 ConsumerConfig configConsumer = await ConfigFiles.LoadConfig<ConsumerConfig>(@"..\..\Infrastructure\Messaging\Config\kafkaconsumer.config");
 
@@ -46,10 +40,6 @@ services.AddScoped<IPostRepository, PostRepository>();
 services.AddScoped<ICommentRepository, CommentRepository>();
 
 var serviceProvider = services.BuildServiceProvider();
-
-var cosmosDBManager = serviceProvider.GetRequiredService<CosmosDBManager>();
-await cosmosDBManager.CheckAndCreateDatabase();
-await cosmosDBManager.CreateProjectContainers();
 
 CancellationTokenSource cts = new CancellationTokenSource();
 
