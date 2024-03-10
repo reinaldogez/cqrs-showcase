@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    container_name: sql-container
+    networks:
+      - mydockernetwork
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${SA_PASSWORD}"  # Use the variable from .env file
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    restart: always
+
+networks:
+  mydockernetwork:
+    name: mydockernetwork
