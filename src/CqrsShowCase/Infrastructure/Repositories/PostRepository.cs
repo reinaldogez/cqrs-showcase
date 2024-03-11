@@ -1,5 +1,4 @@
-using CqrsShowCase.Infrastructure.Data.AzureCosmosDb.Configuration;
-using CqrsShowCase.Infrastructure.Data.AzureCosmosDb.Managers;
+using CqrsShowCase.Infrastructure.Data.MsSqlServer.DataAccess;
 using CqrsShowCase.Query.Domain.Entities;
 using CqrsShowCase.Query.Domain.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -10,17 +9,20 @@ public class PostRepository : IPostRepository
 {
     const string ContainerName = "Post";
     private readonly IConfiguration _configuration;
-    private readonly CosmosCommandEngine _cosmosCommandEngine;
 
-    public PostRepository(IConfiguration configuration, CosmosCommandEngine cosmosCommandEngine)
+    private readonly DatabaseContextFactory _contextFactory;
+
+    public PostRepository(DatabaseContextFactory contextFactory)
     {
-        _configuration = configuration;
-        _cosmosCommandEngine = cosmosCommandEngine;
+        _contextFactory = contextFactory;
     }
+
     public async Task CreateAsync(PostEntity post)
     {
-        await _cosmosCommandEngine.InsertItemAsync(post, CosmosExtensions._cosmosDbSettings.DatabaseName,
-            ContainerName, post.PostId.ToString());
+        using DatabaseContext context = _contextFactory.CreateDbContext();
+        context.Posts.Add(post);
+
+        _ = await context.SaveChangesAsync();
     }
 
     public Task DeleteAsync(Guid postId)

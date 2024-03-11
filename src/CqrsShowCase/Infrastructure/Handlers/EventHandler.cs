@@ -1,7 +1,6 @@
 using System.Text;
 using CqrsShowCase.Application.Handlers;
 using CqrsShowCase.Core.Events;
-using CqrsShowCase.Infrastructure.Data.AzureCosmosDb;
 using CqrsShowCase.Query.Domain.Entities;
 using CqrsShowCase.Query.Domain.Repositories;
 
@@ -30,7 +29,7 @@ public class EventHandler : IEventHandler
         Console.WriteLine(sb.ToString());
         Console.ResetColor();
         
-        var post = new CosmosPostEntity
+        var post = new PostEntity
         {
             PostId = @event.Id,
             Author = @event.Author,

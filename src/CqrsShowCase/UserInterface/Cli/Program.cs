@@ -15,88 +15,139 @@ using CqrsShowCase.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using CqrsShowCase.Infrastructure.Data.MsSqlServer.DataAccess;
 
-var builder = new ConfigurationBuilder()
-    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-
-var configuration = builder.Build();
-
+var builder = BuildConfiguration();
 var services = new ServiceCollection();
-services.AddSingleton<IConfiguration>(configuration);
-
-var connectionStringTemplate = configuration.GetConnectionString("SqlServer");
-var password = Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD") ?? "defaultPassword";
-// Replace a placeholder in the connection string template with the actual password.
-var connectionString = connectionStringTemplate.Replace("{PASSWORD}", password);
-
-Action<DbContextOptionsBuilder> configureDbContext = (o => o.UseLazyLoadingProxies().UseSqlServer(connectionString));
-services.AddDbContext<DatabaseContext>(configureDbContext);
-services.AddSingleton<DatabaseContextFactory>(new DatabaseContextFactory(configureDbContext));
-
-services.AddScoped<IEventStore, EventStore>();
-services.AddScoped<IEventHandler, CqrsShowCase.Infrastructure.Handlers.EventHandler>();
-
-ProducerConfig configProducer = await ConfigFiles.LoadConfig<ProducerConfig>(@"..\..\Infrastructure\Messaging\Config\kafkaproducer.config");
-ConsumerConfig configConsumer = await ConfigFiles.LoadConfig<ConsumerConfig>(@"..\..\Infrastructure\Messaging\Config\kafkaconsumer.config");
-
-if (configProducer == null || configConsumer == null)
-{
-    throw new Exception($"An error occurred while reading the Kafka configuration files.");
-}
-
-services.AddSingleton<ProducerConfig>(configProducer);
-services.AddSingleton<ConsumerConfig>(configConsumer);
-services.AddScoped<IEventProducer, EventProducer>();
-services.AddScoped<IEventConsumer, EventConsumer>();
-services.AddScoped<IPostRepository, PostRepository>();
-services.AddScoped<ICommentRepository, CommentRepository>();
+ConfigureServices(services, builder);
 
 var serviceProvider = services.BuildServiceProvider();
 
-CancellationTokenSource cts = new CancellationTokenSource();
+//StartKafka();
 
-Console.CancelKeyPress += (s, e) =>
+// Check for command-line arguments to determine the action
+if (args.Length > 0)
 {
-    e.Cancel = true;
-    cts.Cancel();
-};
-Task consumerTask = null;
-try
+    switch (args[0].ToLower())
+    {
+        case "testsql":
+            await TestDatabaseConnection(serviceProvider);
+            break;
+        default:
+            Console.WriteLine($"Unknown command: {args[0]}");
+            break;
+    }
+}
+else
 {
-    var eventConsumer = serviceProvider.GetRequiredService<IEventConsumer>();
+    Console.WriteLine("No command provided. Available commands: 'testsql'");
+}
 
-    string topicName = Environment.GetEnvironmentVariable("KAFKA_TOPIC", EnvironmentVariableTarget.User);
-    consumerTask = Task.Run(() => eventConsumer.Consume(topicName, cts.Token));
-    var eventStore = serviceProvider.GetRequiredService<IEventStore>();
-    CreateAndPostEventOnEventStore(eventStore);
-    await consumerTask;
-}
-catch (TaskCanceledException ex)
+IConfiguration BuildConfiguration()
 {
-    Console.WriteLine($"Exception on EventConsumer_ConsumesAndHandlesPostCreatedEvent_Successfully: {Environment.NewLine}" +
-        $"The operation timed out {ex.Message}");
-    throw new Exception("The operation timed out", ex);
+    return new ConfigurationBuilder()
+        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        .Build();
 }
-catch (Exception ex)
-{
-    Console.WriteLine($"Exception on EventConsumer_ConsumesAndHandlesPostCreatedEvent_Successfully{ex.Message}");
-}
-finally
-{
-    //the broker needs to ensure that there are no active consumers or producers using
-    //the topic before it can safely remove it.
-    cts.Cancel();
 
+async void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+{
+    services.AddSingleton<IConfiguration>(configuration);
+
+    var connectionString = GetDatabaseConnectionString(configuration);
+    Console.WriteLine($"SQL Server Connection String: {connectionString}");
+    Action<DbContextOptionsBuilder> configureDbContext = (o => o.UseLazyLoadingProxies().UseSqlServer(connectionString));
+    services.AddDbContext<DatabaseContext>(configureDbContext);
+    services.AddSingleton<DatabaseContextFactory>(new DatabaseContextFactory(configureDbContext));
+
+    services.AddScoped<IEventStore, EventStore>();
+    services.AddScoped<IEventHandler, CqrsShowCase.Infrastructure.Handlers.EventHandler>();
+
+    ProducerConfig configProducer = await ConfigFiles.LoadConfig<ProducerConfig>(@"..\..\Infrastructure\Messaging\Config\kafkaproducer.config");
+    ConsumerConfig configConsumer = await ConfigFiles.LoadConfig<ConsumerConfig>(@"..\..\Infrastructure\Messaging\Config\kafkaconsumer.config");
+
+    if (configProducer == null || configConsumer == null)
+    {
+        throw new Exception($"An error occurred while reading the Kafka configuration files.");
+    }
+
+    services.AddSingleton<ProducerConfig>(configProducer);
+    services.AddSingleton<ConsumerConfig>(configConsumer);
+    services.AddScoped<IEventProducer, EventProducer>();
+    services.AddScoped<IEventConsumer, EventConsumer>();
+    services.AddScoped<IPostRepository, PostRepository>();
+    services.AddScoped<ICommentRepository, CommentRepository>();
+
+}
+
+string GetDatabaseConnectionString(IConfiguration configuration)
+{
+    var connectionStringTemplate = configuration.GetConnectionString("SqlServer");
+    var password = Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD", EnvironmentVariableTarget.User);
+    return connectionStringTemplate.Replace("{PASSWORD}", password);
+}
+
+async Task TestDatabaseConnection(IServiceProvider serviceProvider)
+{
+    using var scope = serviceProvider.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
     try
     {
-        // Wait for the consumer to finish
+        var canConnect = await dbContext.Database.CanConnectAsync();
+        Console.WriteLine(canConnect ? "Database connection successful." : "Failed to connect to the database.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error testing database connection: {ex.Message}");
+    }
+}
+
+async void StartKafka()
+{
+    CancellationTokenSource cts = new CancellationTokenSource();
+
+    Console.CancelKeyPress += (s, e) =>
+    {
+        e.Cancel = true;
+        cts.Cancel();
+    };
+    Task consumerTask = null;
+    try
+    {
+        var eventConsumer = serviceProvider.GetRequiredService<IEventConsumer>();
+
+        string topicName = Environment.GetEnvironmentVariable("KAFKA_TOPIC", EnvironmentVariableTarget.User);
+        consumerTask = Task.Run(() => eventConsumer.Consume(topicName, cts.Token));
+        var eventStore = serviceProvider.GetRequiredService<IEventStore>();
+        CreateAndPostEventOnEventStore(eventStore);
         await consumerTask;
     }
-    catch (OperationCanceledException)
+    catch (TaskCanceledException ex)
     {
-        // Ignore the exception since we're cancelling the consumer deliberately
+        Console.WriteLine($"Exception on EventConsumer_ConsumesAndHandlesPostCreatedEvent_Successfully: {Environment.NewLine}" +
+            $"The operation timed out {ex.Message}");
+        throw new Exception("The operation timed out", ex);
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Exception on EventConsumer_ConsumesAndHandlesPostCreatedEvent_Successfully{ex.Message}");
+    }
+    finally
+    {
+        //the broker needs to ensure that there are no active consumers or producers using
+        //the topic before it can safely remove it.
+        cts.Cancel();
 
+        try
+        {
+            // Wait for the consumer to finish
+            await consumerTask;
+        }
+        catch (OperationCanceledException)
+        {
+            // Ignore the exception since we're cancelling the consumer deliberately
+        }
+
+    }
 }
 
 void CreateAndPostEventOnEventStore(IEventStore eventStore)
