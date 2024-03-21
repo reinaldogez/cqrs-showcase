@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo-container
+    networks:
+      - mydockernetwork
+    volumes:
+      - mongodb_data_container:/data/db
+    ports:
+      - "27017:27017"
+    restart: always
+
+networks:
+  mydockernetwork:
+    name: mydockernetwork
+
+volumes:
+  mongodb_data_container:
+    name: mongodb_data_container
