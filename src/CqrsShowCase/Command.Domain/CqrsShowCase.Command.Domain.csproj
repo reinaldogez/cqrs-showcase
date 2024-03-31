@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <ProjectReference Include="..\Core\CqrsShowCase.Core.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
