@@ -19,6 +19,7 @@ In this showcase project, I will design and implement a social media post micros
   - [Usage](#usage)
   - [Domain-Driven Design](#domain-driven-design)
     - [Bounded Context](#bounded-context)
+    - [Aggregate and Aggregate Root](#aggregate-and-aggregate-root)
   - [Synchronization](#synchronization)
   - [Troubleshooting](#troubleshooting)
 
