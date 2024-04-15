@@ -80,6 +80,68 @@ The social media post microservice can be independently developed, deployed, and
 ##### 4. Ubiquitous Language
 Within this Bounded Context, all stakeholders—developers, business analysts, and users—use a common language to describe features and processes related to posts. This ubiquitous language ensures that everyone understands and communicates effectively about the system functionalities, reducing misunderstandings and aligning project goals across different teams.
 
+### Aggregate and Aggregate Root
+
+#### Aggregate
+"An Aggregate is an explicit grouping of domain objects designed to support the behaviors and invariants of a domain model while acting as a consistency and transactional boundary." This definition is provided by Scott Millett and Nick Tune in their book Patterns, Principles, and Practices of Domain-Driven Design.
+
+#### Aggregate Root
+The `AggregateRoot` is a specific entity contained within an Aggregate and acts as the gatekeeper to the Aggregate. This entity has global identity and is responsible for checking all modifications and state changes in the Aggregate. The `AggregateRoot` ensures that the Aggregate remains in a valid state throughout its lifecycle. In the project code, `AggregateRoot` is an abstract class that contains a list of changes (`_changes`) which track events that have not yet been committed to the store, demonstrating how changes within the Aggregate are managed and applied.
+
+#### Example Usage in Project
+
+```csharp
+public abstract class AggregateRoot
+{
+    protected Guid _id;
+    private readonly List<BaseEvent> _changes = new();
+
+    // ...other methods...
+
+    protected void RaiseEvent(BaseEvent @event)
+    {
+        ApplyChange(@event, true);
+    }
+}
+
+```
+
+```csharp
+public class PostAggregate : AggregateRoot
+{
+    // Post-specific properties and methods
+    public void AddComment(string comment, string username)
+    {
+        // Method implementation
+    }
+
+    // Event application methods
+    public void Apply(PostCreatedEvent @event)
+    {
+        _id = @event.Id;
+        _active = true;
+        _author = @event.Author;
+    }
+}
+
+```
+
+#### Simplified Aggregate Structure
+
+The `PostAggregate` serves both as the Aggregate Root and, effectively, as the aggregate itself due to the absence of other distinct entities within its boundary. This setup allows the `PostAggregate` to encapsulate all related functionalities and operations, such as managing comments and likes directly within its class structure.
+
+##### Key Characteristics of `PostAggregate` as an Aggregate Root
+
+###### Singular Aggregate Composition
+It manages not only the state of a social media post but also operations related to it like comments and likes, handled directly through methods and local collections.
+
+###### Role of `PostAggregate` in the Domain Model
+It plays the dual role of being both the manager of the aggregate and the primary entity within it. This is common in simpler domain models or when a domain entity has limited relationships or complexity.
+
+###### Lack of Additional Entities
+There are no other domain entities that are part of the `PostAggregate` beyond basic data attributes and behaviors, making it effectively the aggregate in its entirety.
+
+
 ## Synchronization
 
 I created this topic on the discussion tab [Updating Read Databases in a CQRS Architecture](https://github.com/reinaldogez/cqrs-showcase/discussions/1), where the main options are deeply discussed.
