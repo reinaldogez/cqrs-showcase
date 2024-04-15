@@ -66,6 +66,20 @@ Instructions for using the project.
 ### Bounded Context
 In DDD, a bounded context defines a specific problem area within a domain and may correspond to a separate microservice. For example, in the context of a social media application, a bounded context could be defined for post-related functions. This bounded context could then be implemented as a social media post microservice, which would handle all the functions related to creating, managing, and displaying posts.
 
+#### Key Concepts
+
+##### 1. Logical Boundaries
+This Bounded Context specifically encapsulates all operations related to social media posts, ensuring all functionalities are cohesively organized and independent from other features like user management.
+
+##### 2. Consistency and Integrity
+By using the Command Query Responsibility Segregation (CQRS) pattern, this context maintains a consistent model by separating read and write operations, which enhances data integrity and system performance.
+
+##### 3. Autonomy and Modular Development
+The social media post microservice can be independently developed, deployed, and scaled, allowing teams to work autonomously and focus solely on improving post-related functionalities without cross-interference.
+
+##### 4. Ubiquitous Language
+Within this Bounded Context, all stakeholders—developers, business analysts, and users—use a common language to describe features and processes related to posts. This ubiquitous language ensures that everyone understands and communicates effectively about the system functionalities, reducing misunderstandings and aligning project goals across different teams.
+
 ## Synchronization
 
 I created this topic on the discussion tab [Updating Read Databases in a CQRS Architecture](https://github.com/reinaldogez/cqrs-showcase/discussions/1), where the main options are deeply discussed.
