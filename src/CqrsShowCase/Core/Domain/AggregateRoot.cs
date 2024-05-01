@@ -2,7 +2,6 @@ using CqrsShowCase.Core.Events;
 
 namespace CqrsShowCase.Core.Domain;
 
-
 public abstract class AggregateRoot
 {
     protected Guid _id;
