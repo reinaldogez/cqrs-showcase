@@ -1,5 +1,8 @@
+using CqrsShowCase.Command.Domain.Aggregates;
 using CqrsShowCase.Core.Consumers;
+using CqrsShowCase.Core.Domain;
 using CqrsShowCase.Core.Events;
+using CqrsShowCase.Core.Exceptions;
 using CqrsShowCase.Core.Infrascructure;
 using CqrsShowCase.Core.Producers;
 
@@ -7,26 +10,51 @@ namespace CqrsShowCase.Infrastructure.Stores;
 
 public class EventStore : IEventStore
 {
-    // private readonly IEventStoreRepository _eventStoreRepository;
+    private readonly IEventStoreRepository _eventStoreRepository;
+
     private readonly IEventProducer _eventProducer;
 
-    public EventStore(IEventProducer eventProducer)
+    public EventStore(IEventStoreRepository eventStoreRepository, IEventProducer eventProducer)
     {
+        _eventStoreRepository = eventStoreRepository;
         _eventProducer = eventProducer;
     }
 
     public async Task<List<BaseEvent>> GetEventsAsync(Guid aggregateId)
     {
-        // Do this method with the Mongo DB feature
-        // simply return a task with an empty list for while
-        return await Task.FromResult(new List<BaseEvent>());
+        var eventStream = await _eventStoreRepository.FindByAggregateId(aggregateId);
+
+        if (eventStream == null || !eventStream.Any())
+            throw new AggregateNotFoundException("Incorrect post ID provided!");
+
+        return eventStream.OrderBy(x => x.Version).Select(x => x.EventData).ToList();
     }
 
     public async Task SaveEventsAsync(Guid aggregateId, IEnumerable<BaseEvent> events, int expectedVersion)
     {
+        var eventStream = await _eventStoreRepository.FindByAggregateId(aggregateId);
+
+        if (expectedVersion != -1 && eventStream[^1].Version != expectedVersion)
+            throw new ConcurrencyException();
+
+        var version = expectedVersion;
+
         foreach (var @event in events)
         {
-            @event.Version = 0;
+            version++;
+            @event.Version = version;
+            var eventType = @event.GetType().Name;
+            var eventModel = new EventModel
+            {
+                TimeStamp = DateTime.Now,
+                AggregateIdentifier = aggregateId,
+                AggregateType = nameof(PostAggregate),
+                Version = version,
+                EventType = eventType,
+                EventData = @event
+            };
+
+            await _eventStoreRepository.SaveAsync(eventModel);
 
             string topicName = Environment.GetEnvironmentVariable("KAFKA_TOPIC", EnvironmentVariableTarget.User);
             await _eventProducer.ProduceAsync(topicName, @event);

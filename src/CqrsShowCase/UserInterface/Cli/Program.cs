@@ -14,6 +14,8 @@ using CqrsShowCase.Query.Domain.Repositories;
 using CqrsShowCase.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using CqrsShowCase.Infrastructure.Data.MsSqlServer.DataAccess;
+using CqrsShowCase.Infrastructure.Config;
+using CqrsShowCase.Core.Domain;
 
 var builder = BuildConfiguration();
 var services = new ServiceCollection();
@@ -53,11 +55,17 @@ async void ConfigureServices(IServiceCollection services, IConfiguration configu
 {
     services.AddSingleton<IConfiguration>(configuration);
 
+    services.Configure<MongoDbConfig>(configuration.GetSection(nameof(MongoDbConfig)));
+    services.AddScoped<IEventStoreRepository, EventStoreRepository>();
+
     var connectionString = GetDatabaseConnectionString(configuration);
     Console.WriteLine($"SQL Server Connection String: {connectionString}");
     Action<DbContextOptionsBuilder> configureDbContext = (o => o.UseLazyLoadingProxies().UseSqlServer(connectionString));
     services.AddDbContext<DatabaseContext>(configureDbContext);
     services.AddSingleton<DatabaseContextFactory>(new DatabaseContextFactory(configureDbContext));
+
+    services.AddScoped<IPostRepository, PostRepository>();
+    services.AddScoped<ICommentRepository, CommentRepository>();
 
     services.AddScoped<IEventStore, EventStore>();
     services.AddScoped<IEventHandler, CqrsShowCase.Infrastructure.Handlers.EventHandler>();
@@ -74,8 +82,7 @@ async void ConfigureServices(IServiceCollection services, IConfiguration configu
     services.AddSingleton<ConsumerConfig>(configConsumer);
     services.AddScoped<IEventProducer, EventProducer>();
     services.AddScoped<IEventConsumer, EventConsumer>();
-    services.AddScoped<IPostRepository, PostRepository>();
-    services.AddScoped<ICommentRepository, CommentRepository>();
+
 
 }
 
