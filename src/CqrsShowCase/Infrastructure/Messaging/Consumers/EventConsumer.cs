@@ -4,7 +4,7 @@ using Confluent.Kafka;
 using CqrsShowCase.Application.Handlers;
 using CqrsShowCase.Core.Consumers;
 using CqrsShowCase.Core.Events;
-using Post.Query.Infrastructure.Converters;
+using CqrsShowCase.Infrastructure.Converters;
 
 namespace CqrsShowCase.Infrastructure.Messaging.Consumers;
 
