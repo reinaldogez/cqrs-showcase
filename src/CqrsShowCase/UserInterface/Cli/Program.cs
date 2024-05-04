@@ -16,6 +16,8 @@ using Microsoft.EntityFrameworkCore;
 using CqrsShowCase.Infrastructure.Data.MsSqlServer.DataAccess;
 using CqrsShowCase.Infrastructure.Config;
 using CqrsShowCase.Core.Domain;
+using MongoDB.Driver;
+using Microsoft.Extensions.Options;
 
 var builder = BuildConfiguration();
 var services = new ServiceCollection();
@@ -33,6 +35,9 @@ if (args.Length > 0)
         case "testsql":
             await TestDatabaseConnection(serviceProvider);
             break;
+        case "testmongodb":
+            await TestMongoDbConnection(serviceProvider);
+            break;
         default:
             Console.WriteLine($"Unknown command: {args[0]}");
             break;
@@ -40,7 +45,7 @@ if (args.Length > 0)
 }
 else
 {
-    Console.WriteLine("No command provided. Available commands: 'testsql'");
+    Console.WriteLine("No command provided. Available commands: 'testsql', 'testmongodb'");
 }
 
 IConfiguration BuildConfiguration()
@@ -57,6 +62,7 @@ async void ConfigureServices(IServiceCollection services, IConfiguration configu
 
     services.Configure<MongoDbConfig>(configuration.GetSection(nameof(MongoDbConfig)));
     services.AddScoped<IEventStoreRepository, EventStoreRepository>();
+    services.AddScoped<IEventStore, EventStore>();
 
     var connectionString = GetDatabaseConnectionString(configuration);
     Console.WriteLine($"SQL Server Connection String: {connectionString}");
@@ -83,7 +89,6 @@ async void ConfigureServices(IServiceCollection services, IConfiguration configu
     services.AddScoped<IEventProducer, EventProducer>();
     services.AddScoped<IEventConsumer, EventConsumer>();
 
-
 }
 
 string GetDatabaseConnectionString(IConfiguration configuration)
@@ -105,6 +110,35 @@ async Task TestDatabaseConnection(IServiceProvider serviceProvider)
     catch (Exception ex)
     {
         Console.WriteLine($"Error testing database connection: {ex.Message}");
+    }
+}
+
+async Task TestMongoDbConnection(IServiceProvider serviceProvider)
+{
+    var mongoDbConfig = serviceProvider.GetRequiredService<IOptions<MongoDbConfig>>().Value;
+    var connectionString = mongoDbConfig.ConnectionString;
+
+    var client = new MongoClient(connectionString);
+
+    try
+    {
+        var databases = await client.ListDatabaseNames().ToListAsync();
+        if (databases.Any())
+        {
+            Console.WriteLine("MongoDB connection successful. Databases:");
+            foreach (var db in databases)
+            {
+                Console.WriteLine($" - {db}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("MongoDB connection successful, but no databases found.");
+        }
+    }
+    catch (MongoConnectionException ex)
+    {
+        Console.WriteLine($"Error testing MongoDB connection: {ex.Message}");
     }
 }
 
