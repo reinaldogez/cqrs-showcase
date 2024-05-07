@@ -19,7 +19,22 @@ In this showcase project, I will design and implement a social media post micros
   - [Usage](#usage)
   - [Domain-Driven Design](#domain-driven-design)
     - [Bounded Context](#bounded-context)
+      - [Key Concepts](#key-concepts)
+        - [1. Logical Boundaries](#1-logical-boundaries)
+        - [2. Consistency and Integrity](#2-consistency-and-integrity)
+        - [3. Autonomy and Modular Development](#3-autonomy-and-modular-development)
+        - [4. Ubiquitous Language](#4-ubiquitous-language)
     - [Aggregate and Aggregate Root](#aggregate-and-aggregate-root)
+      - [Aggregate](#aggregate)
+      - [Aggregate Root](#aggregate-root)
+      - [Example Usage in Project](#example-usage-in-project)
+      - [Simplified Aggregate Structure](#simplified-aggregate-structure)
+        - [Key Characteristics of `PostAggregate` as an Aggregate Root](#key-characteristics-of-postaggregate-as-an-aggregate-root)
+          - [Singular Aggregate Composition](#singular-aggregate-composition)
+          - [Role of `PostAggregate` in the Domain Model](#role-of-postaggregate-in-the-domain-model)
+          - [Lack of Additional Entities](#lack-of-additional-entities)
+  - [Event Sourcing](#event-sourcing)
+    - [Why Event Sourcing?](#why-event-sourcing)
   - [Synchronization](#synchronization)
   - [Troubleshooting](#troubleshooting)
 
@@ -142,6 +157,10 @@ It plays the dual role of being both the manager of the aggregate and the primar
 ###### Lack of Additional Entities
 There are no other domain entities that are part of the `PostAggregate` beyond basic data attributes and behaviors, making it effectively the aggregate in its entirety.
 
+## Event Sourcing
+"Event Sourcing ensures that all changes to application state are stored as a sequence of events. Not just can we query these events, we can also use the event log to reconstruct past states, and as a foundation to automatically adjust the state to cope with retroactive changes." Martin Fowler
+
+### Why Event Sourcing?
 
 ## Synchronization
 
@@ -149,5 +168,5 @@ I created this topic on the discussion tab [Updating Read Databases in a CQRS Ar
 
 ## Troubleshooting
 
-- **Error: "message error"** - If you're seeing this error message, you need to bla bla
+- **Error: "message error"** - Template message
 
