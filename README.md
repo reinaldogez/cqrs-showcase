@@ -35,6 +35,9 @@ In this showcase project, I will design and implement a social media post micros
           - [Lack of Additional Entities](#lack-of-additional-entities)
   - [Event Sourcing](#event-sourcing)
     - [Why Event Sourcing?](#why-event-sourcing)
+    - [Event Store](#event-store)
+      - [Key Characteristics of an Event Store:](#key-characteristics-of-an-event-store)
+      - [Optimistic Concurrency Control](#optimistic-concurrency-control)
   - [Synchronization](#synchronization)
   - [Troubleshooting](#troubleshooting)
 
@@ -145,14 +148,13 @@ public class PostAggregate : AggregateRoot
 #### Simplified Aggregate Structure
 
 The `PostAggregate` serves both as the Aggregate Root and, effectively, as the aggregate itself due to the absence of other distinct entities within its boundary. This setup allows the `PostAggregate` to encapsulate all related functionalities and operations, such as managing comments and likes directly within its class structure.
-
 ##### Key Characteristics of `PostAggregate` as an Aggregate Root
 
 ###### Singular Aggregate Composition
 It manages not only the state of a social media post but also operations related to it like comments and likes, handled directly through methods and local collections.
 
 ###### Role of `PostAggregate` in the Domain Model
-It plays the dual role of being both the manager of the aggregate and the primary entity within it. This is common in simpler domain models or when a domain entity has limited relationships or complexity.
+t plays the dual role of being both the manager of the aggregate and the primary entity within it. This is common in simpler domain models or when a domain entity has limited relationships or complexity.
 
 ###### Lack of Additional Entities
 There are no other domain entities that are part of the `PostAggregate` beyond basic data attributes and behaviors, making it effectively the aggregate in its entirety.
@@ -161,6 +163,45 @@ There are no other domain entities that are part of the `PostAggregate` beyond b
 "Event Sourcing ensures that all changes to application state are stored as a sequence of events. Not just can we query these events, we can also use the event log to reconstruct past states, and as a foundation to automatically adjust the state to cope with retroactive changes." Martin Fowler
 
 ### Why Event Sourcing?
+Event Sourcing has gained popularity because it maintains a full history of system activities, providing a comprehensive log of all events that have led to the current state of your domain model. This approach is valuable because, if you only have the current state, you lack a way to understand the sequence of actions and decisions that brought the system to its present configuration. By storing each change as a unique event, Event Sourcing not only facilitates troubleshooting and system analysis by allowing to replay and reconstruct past states, but it also enhances auditability and can simplify the process of implementing new features or making retroactive changes to the system.
+
+### Event Store
+
+An **Event Store** is a specialized type of database designed specifically for the storage of events as part of an Event Sourcing architecture. It differs from traditional databases in that it captures all changes to an application's state as a series of events. These events are stored in a sequential order, creating an immutable historical record of all actions taken within the system. In this project, the **Event Store** utilizes MongoDB as the underlying write database.
+
+#### Key Characteristics of an Event Store:
+
+- **Immutable Log:** The Event Store functions as an immutable log where events are recorded sequentially. Once an event is recorded, it cannot be changed or deleted, which ensures the historical accuracy and integrity of the log.
+  
+- **Event-Driven:** The store captures the entire series of actions and events that affect the state of the application, not just the current state. Each event in the store represents a state change in the domain.
+
+- **Reconstruct State:** By replaying the events from the Event Store, the state of the application at any point in time can be reconstructed. This capability is critical for debugging, auditing, historical analysis, and system recovery.
+
+#### Optimistic Concurrency Control
+
+In this project, Optimistic Concurrency Control is implemented within the `EventStore` class to manage simultaneous access to the Event Store. This method does not prevent conflicts during the execution of transactions but instead checks for conflicts at the time of saving the events. It ensures that if the state of the aggregate has changed since it was last read (which is indicated by the `expectedVersion`), the transaction will not be allowed to proceed.
+
+- **Code Implementation:**
+```csharp
+    public async Task SaveEventsAsync(Guid aggregateId, IEnumerable<BaseEvent> events, int expectedVersion)
+    {
+        var eventStream = await _eventStoreRepository.FindByAggregateId(aggregateId);
+
+        if (expectedVersion != -1 && eventStream[^1].Version != expectedVersion)
+            throw new ConcurrencyException();
+    
+        // Rest of the method implementation
+    }
+```
+
+- **Pros:**
+  - **Performance:** Optimistic Concurrency Control typically offers better performance than pessimistic locking in scenarios with low to moderate contention, as it allows multiple processes to proceed without waiting for locks.
+  - **Deadlock Avoidance:** This approach avoids deadlocks by design, as transactions don't hold locks while they are working on data and only validate data at commit time.
+
+- **Cons:**
+  - **Conflict Handling:** If conflicts occur, the transaction may need to be rolled back and restarted, which can lead to wasted resources, especially in high contention scenarios.
+  - **Complexity in Transaction Management:** Managing retries and handling failures due to concurrency conflicts can increase the complexity of application logic.
+
 
 ## Synchronization
 
