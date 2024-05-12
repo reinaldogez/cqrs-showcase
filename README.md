@@ -5,7 +5,7 @@
 This project is a demonstration of the Command and Query Responsibility Segregation (CQRS) pattern using .NET 6. The showcase application uses MS SQL Server as the read database and MongoDB as the write database. To ensure eventual consistency between the read and write databases, Kafka is utilized as an event-driven synchronization mechanism. By integrating Kafka into the architecture, the system can effectively propagate updates and synchronize data across the databases in an asynchronous and scalable manner.
 The project includes sample code for implementing CQRS in a .NET application, along with instructions for setting up the required databases and deploying the application. This showcase can serve as a starting point for developers who are interested in implementing the CQRS pattern in their .NET applications.
 
-In this showcase project, I will design and implement a social media post microservice using the CQRS pattern to handle all post-related functions, such as creating, editing, and displaying posts. By using CQRS, we can optimize the performance of the microservice and achieve scalability, flexibility, and maintainability in our application architecture.
+In this showcase project, I will design and implement a social media post microservice using the CQRS pattern to handle all post-related functions, such as creating, editing, and displaying posts. By using CQRS, we can optimize the performance of the microservice and achieve scalability, flexibility, and maintainability in the application architecture.
 
 ## Table of Contents
 
@@ -38,6 +38,9 @@ In this showcase project, I will design and implement a social media post micros
     - [Event Store](#event-store)
       - [Key Characteristics of an Event Store:](#key-characteristics-of-an-event-store)
       - [Optimistic Concurrency Control](#optimistic-concurrency-control)
+      - [Aggregate Hydration via Event Sourcing](#aggregate-hydration-via-event-sourcing)
+        - [Key Classes and Methods](#key-classes-and-methods)
+      - [Using Snapshots for Performance Optimization](#using-snapshots-for-performance-optimization)
   - [Synchronization](#synchronization)
   - [Troubleshooting](#troubleshooting)
 
@@ -201,6 +204,94 @@ In this project, Optimistic Concurrency Control is implemented within the `Event
 - **Cons:**
   - **Conflict Handling:** If conflicts occur, the transaction may need to be rolled back and restarted, which can lead to wasted resources, especially in high contention scenarios.
   - **Complexity in Transaction Management:** Managing retries and handling failures due to concurrency conflicts can increase the complexity of application logic.
+
+#### Aggregate Hydration via Event Sourcing
+
+Aggregate hydration refers to the process of reconstructing an aggregate's state by replaying its past events. This is fundamental in event-sourcing architectures, where the current state is derived from a history of events rather than being stored directly. Here's how it is implemented in my project:
+
+##### Key Classes and Methods
+
+1. **AggregateRoot Class**
+
+   The `AggregateRoot` class is the base for all aggregate types in the system and manages changes via events.
+
+```csharp
+   public abstract class AggregateRoot
+   {
+       protected Guid _id;
+       private readonly List<BaseEvent> _changes = new List<BaseEvent>();
+
+       public Guid Id => _id;
+       public int Version { get; set; } = -1;
+
+       private void ApplyChange(BaseEvent @event, bool isNew)
+       {
+           var method = GetType().GetMethod("Apply", new Type[] { @event.GetType() });
+           if (method == null)
+           {
+               throw new ArgumentNullException(nameof(method), $"The Apply method was not found in the aggregate for {@event.GetType().Name}!");
+           }
+           method.Invoke(this, new object[] { @event });
+           if (isNew)
+           {
+               _changes.Add(@event);
+           }
+       }
+
+       public void ReplayEvents(IEnumerable<BaseEvent> events)
+       {
+           foreach (var @event in events)
+           {
+               ApplyChange(@event, false);
+           }
+       }
+
+       // Other methods
+   }
+```
+The `ReplayEvents` method is crucial for hydration as it applies each event to the aggregate without recording them as new changes, effectively rebuilding the aggregate's state from historical data.
+
+2. **EventSourcingHandler Class**
+
+  This handler is responsible for fetching the event stream from the store and using it to reconstruct an aggregate.
+
+```csharp
+public class EventSourcingHandler<TAggregate> where TAggregate : AggregateRoot, new()
+{
+    private readonly IEventStore _eventStore;
+
+    public EventSourcingHandler(IEventStore eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
+    public async Task<TAggregate> GetByIdAsync(Guid aggregateId)
+    {
+        var aggregate = new TAggregate();
+        var events = await _eventStore.GetEventsAsync(aggregateId);
+        if (events == null || !events.Any()) return aggregate;
+
+        aggregate.ReplayEvents(events);
+        aggregate.Version = events.Select(x => x.Version).Max();
+        return aggregate;
+    }
+
+    public async Task SaveAsync(AggregateRoot aggregate)
+    {
+        await _eventStore.SaveEventsAsync(aggregate.Id, aggregate.GetUncommittedChanges(), aggregate.Version);
+        aggregate.MarkChangesAsCommitted();
+    }
+}
+```
+In the `GetByIdAsync` method, an empty aggregate is created, and events are fetched from the event store. These events are then replayed on the aggregate to rebuild its state before returning it.
+
+#### Using Snapshots for Performance Optimization
+
+While not currently implemented in the project, snapshots are a powerful optimization technique for managing large volumes of events in the Event Store. Snapshots capture the state of an aggregate at a specific point, allowing the system to bypass the need to replay all events and instead, only apply events that occurred after the snapshot was created. This method reduces load times and improves efficiency, especially for aggregates with extensive histories.
+
+**Benefits of Snapshots:**
+- **Efficiency:** Minimizes the number of events to replay, speeding up the state reconstruction process.
+- **Scalability:** Enhances the system's ability to handle large volumes of events without degradation in performance.
 
 
 ## Synchronization
