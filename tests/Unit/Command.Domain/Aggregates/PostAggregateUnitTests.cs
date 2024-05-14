@@ -4,7 +4,6 @@ using System.Linq;
 using CqrsShowCase.Command.Domain.Aggregates;
 using CqrsShowCase.Core.Events;
 
-
 namespace CqrsShowCase.Tests.Unit.Command.Domain.Aggregates;
 
 public class PostAggregateTests

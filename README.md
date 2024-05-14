@@ -41,6 +41,12 @@ In this showcase project, I will design and implement a social media post micros
       - [Aggregate Hydration via Event Sourcing](#aggregate-hydration-via-event-sourcing)
         - [Key Classes and Methods](#key-classes-and-methods)
       - [Using Snapshots for Performance Optimization](#using-snapshots-for-performance-optimization)
+  - [Mediator Pattern](#mediator-pattern)
+  - [Mediator Pattern](#mediator-pattern-1)
+    - [Implementation](#implementation)
+      - [Role of Mediator](#role-of-mediator)
+      - [Concrete Implementation](#concrete-implementation)
+    - [Benefits](#benefits)
   - [Synchronization](#synchronization)
   - [Troubleshooting](#troubleshooting)
 
@@ -292,6 +298,53 @@ While not currently implemented in the project, snapshots are a powerful optimiz
 **Benefits of Snapshots:**
 - **Efficiency:** Minimizes the number of events to replay, speeding up the state reconstruction process.
 - **Scalability:** Enhances the system's ability to handle large volumes of events without degradation in performance.
+
+## Mediator Pattern
+"Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently." Gang of Four book
+
+## Mediator Pattern
+
+"Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently." - Gang of Four
+
+### Implementation
+
+In this project, I implement the Mediator pattern through the use of the MediatR library, which serves as the central mediator. This pattern is particularly employed in my command handling architecture, where commands related to domain operations are managed.
+
+#### Role of Mediator
+
+- **Central Command Dispatcher**: The MediatR library serves both as a central dispatcher for commands and as a mediator. As a central dispatcher, it efficiently routes commands to the appropriate handlers, ensuring that components such as API controllers and background services are decoupled from the command handlers. This separation allows to add or change command handlers without impacting the senders, adhering to the Open/Closed Principle.
+As a mediator, MediatR also simplifies the interactions between components, managing the complexity of communication and interaction within the application.
+
+#### Concrete Implementation
+
+- **Command Handlers as Colleagues**: Each command handler implements an interface `IRequestHandler` from MediatR, making them colleagues within the Mediator pattern context. They handle specific types of commands without knowing about the existence or operations of other handlers.
+  
+  ```csharp
+  public class EditCommentCommandHandler : IRequestHandler<EditCommentCommand>
+  {
+      private readonly IEventSourcingHandler<PostAggregate> _eventSourcingHandler;
+
+      public EditCommentCommandHandler(IEventSourcingHandler<PostAggregate> eventSourcingHandler)
+      {
+          _eventSourcingHandler = eventSourcingHandler;
+      }
+
+      public async Task Handle(EditCommentCommand command, CancellationToken cancellationToken)
+      {
+          var aggregate = await _eventSourcingHandler.GetByIdAsync(command.Id);
+          aggregate.EditComment(command.CommentId, command.Comment, command.Username);
+          await _eventSourcingHandler.SaveAsync(aggregate);
+      }
+  }
+```
+
+### Benefits
+
+- **Loose Coupling**: Command senders need only know how to send commands through the mediator. They remain oblivious to the complexities of how commands are handled.
+
+- **Enhanced Maintainability**: Changes in business logic or the introduction of new features require modifications only in specific handlers, without affecting other parts of the application.
+
+- **Scalability**: New handlers can be easily added and integrated into the existing infrastructure as the application grows.
 
 
 ## Synchronization
