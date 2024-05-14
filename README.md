@@ -42,7 +42,7 @@ In this showcase project, I will design and implement a social media post micros
         - [Key Classes and Methods](#key-classes-and-methods)
       - [Using Snapshots for Performance Optimization](#using-snapshots-for-performance-optimization)
   - [Mediator Pattern](#mediator-pattern)
-  - [Mediator Pattern](#mediator-pattern-1)
+    - [Colleagues in the Mediator Pattern](#colleagues-in-the-mediator-pattern)
     - [Implementation](#implementation)
       - [Role of Mediator](#role-of-mediator)
       - [Concrete Implementation](#concrete-implementation)
@@ -169,7 +169,7 @@ t plays the dual role of being both the manager of the aggregate and the primary
 There are no other domain entities that are part of the `PostAggregate` beyond basic data attributes and behaviors, making it effectively the aggregate in its entirety.
 
 ## Event Sourcing
-"Event Sourcing ensures that all changes to application state are stored as a sequence of events. Not just can we query these events, we can also use the event log to reconstruct past states, and as a foundation to automatically adjust the state to cope with retroactive changes." Martin Fowler
+"Event Sourcing ensures that all changes to application state are stored as a sequence of events. Not just can we query these events, we can also use the event log to reconstruct past states, and as a foundation to automatically adjust the state to cope with retroactive changes." - Martin Fowler
 
 ### Why Event Sourcing?
 Event Sourcing has gained popularity because it maintains a full history of system activities, providing a comprehensive log of all events that have led to the current state of your domain model. This approach is valuable because, if you only have the current state, you lack a way to understand the sequence of actions and decisions that brought the system to its present configuration. By storing each change as a unique event, Event Sourcing not only facilitates troubleshooting and system analysis by allowing to replay and reconstruct past states, but it also enhances auditability and can simplify the process of implementing new features or making retroactive changes to the system.
@@ -300,11 +300,13 @@ While not currently implemented in the project, snapshots are a powerful optimiz
 - **Scalability:** Enhances the system's ability to handle large volumes of events without degradation in performance.
 
 ## Mediator Pattern
-"Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently." Gang of Four book
-
-## Mediator Pattern
 
 "Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently." - Gang of Four
+
+### Colleagues in the Mediator Pattern
+
+In this project, each API controller and its corresponding command handler are considered colleagues through their relationship mediated by MediatR. Controllers send commands to MediatR, which then routes these commands to the appropriate handlers. Each handler processes the command, executing specific business logic without needing to know which controller issued the command. This ensures that controllers and handlers are decoupled and communicate indirectly through MediatR, maintaining a clean separation that enhances maintainability and flexibility.
+
 
 ### Implementation
 
@@ -312,14 +314,14 @@ In this project, I implement the Mediator pattern through the use of the MediatR
 
 #### Role of Mediator
 
-- **Central Command Dispatcher**: The MediatR library serves both as a central dispatcher for commands and as a mediator. As a central dispatcher, it efficiently routes commands to the appropriate handlers, ensuring that components such as API controllers and background services are decoupled from the command handlers. This separation allows to add or change command handlers without impacting the senders, adhering to the Open/Closed Principle.
+- **Central Command Dispatcher**: The MediatR library serves both as a central dispatcher for commands and as a mediator. As a central dispatcher, it efficiently routes commands to the appropriate handlers, ensuring that components such as API controllers and background services are decoupled from the command handlers. This separation allows modifying or extending handlers without changing the existing logic in the controllers, adhering to the open-closed principle.
 As a mediator, MediatR also simplifies the interactions between components, managing the complexity of communication and interaction within the application.
 
 #### Concrete Implementation
 
-- **Command Handlers as Colleagues**: Each command handler implements an interface `IRequestHandler` from MediatR, making them colleagues within the Mediator pattern context. They handle specific types of commands without knowing about the existence or operations of other handlers.
+- **Command Handlers**: Handlers are isolated units that process specific commands. They implement the `IRequestHandler` interface provided by MediatR.
   
-  ```csharp
+```csharp
   public class EditCommentCommandHandler : IRequestHandler<EditCommentCommand>
   {
       private readonly IEventSourcingHandler<PostAggregate> _eventSourcingHandler;
@@ -337,6 +339,42 @@ As a mediator, MediatR also simplifies the interactions between components, mana
       }
   }
 ```
+
+- **API Controllers**: This code snippet shows how the API controller (the sender) is decoupled from the command handlers.
+
+```csharp
+[ApiController]
+[Route("api/v1/[controller]")]
+public class EditCommentController : ControllerBase
+{
+    private readonly ILogger<EditCommentController> _logger;
+    private readonly IMediator _mediator;
+
+    public EditCommentController(ILogger<EditCommentController> logger, IMediator mediator)
+    {
+        _logger = logger;
+        _mediator = mediator;
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> EditCommentAsync(Guid id, EditCommentCommand command)
+    {
+        try
+        {
+            command.Id = id;
+            await _mediator.Send(command);
+
+            return Ok(new BaseResponse
+            {
+                Message = "Edit comment request completed successfully!"
+            });
+        }
+
+        // Exception handling is included in the actual implementation
+    }
+}
+```
+
 
 ### Benefits
 
