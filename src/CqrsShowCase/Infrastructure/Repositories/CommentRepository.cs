@@ -1,13 +1,11 @@
 using CqrsShowCase.Infrastructure.Data.MsSqlServer.DataAccess;
 using CqrsShowCase.Query.Domain.Entities;
 using CqrsShowCase.Query.Domain.Repositories;
-using Microsoft.Extensions.Configuration;
 
 namespace CqrsShowCase.Infrastructure.Repositories;
 
 public class CommentRepository : ICommentRepository
 {
-    private readonly IConfiguration _configuration;
     private readonly DatabaseContextFactory _contextFactory;
 
     public CommentRepository(DatabaseContextFactory contextFactory)
@@ -15,23 +13,32 @@ public class CommentRepository : ICommentRepository
         _contextFactory = contextFactory;
     }
 
-    public Task CreateAsync(CommentEntity comment)
+    public async Task CreateAsync(CommentEntity comment)
     {
-        throw new NotImplementedException();
+        using DatabaseContext context = _contextFactory.CreateDbContext();
+        context.Comments.Add(comment);
+        _ = await context.SaveChangesAsync();
     }
 
-    public Task DeleteAsync(Guid commentId)
+    public async Task<CommentEntity> GetByIdAsync(Guid commentId)
     {
-        throw new NotImplementedException();
+        using DatabaseContext context = _contextFactory.CreateDbContext();
+        return await context.Comments.FindAsync(commentId);
     }
 
-    public Task<CommentEntity> GetByIdAsync(Guid commentId)
+    public async Task UpdateAsync(CommentEntity comment)
     {
-        throw new NotImplementedException();
+        using DatabaseContext context = _contextFactory.CreateDbContext();
+        context.Comments.Update(comment);
+        _ = await context.SaveChangesAsync();
     }
 
-    public Task UpdateAsync(CommentEntity comment)
+    public async Task DeleteAsync(Guid commentId)
     {
-        throw new NotImplementedException();
+        using DatabaseContext context = _contextFactory.CreateDbContext();
+        var comment = await context.Comments.FindAsync(commentId);
+        if (comment == null) return;
+        context.Comments.Remove(comment);
+        _ = await context.SaveChangesAsync();
     }
 }
