@@ -19,5 +19,7 @@
       <ProjectReference Include="..\..\src\CqrsShowCase\Command.Domain\CqrsShowCase.Command.Domain.csproj" />
       <ProjectReference Include="..\..\src\CqrsShowCase\Core\CqrsShowCase.Core.csproj" />
       <ProjectReference Include="..\..\src\CqrsShowCase\Application\CqrsShowCase.Application.csproj" />
+      <ProjectReference Include="..\..\src\CqrsShowCase\Query.Domain\CqrsShowCase.Query.Domain.csproj" />
+      <ProjectReference Include="..\..\src\CqrsShowCase\Infrastructure\CqrsShowCase.Infrastructure.csproj" />
     </ItemGroup>
 </Project>

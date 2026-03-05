@@ -163,7 +163,7 @@ The `PostAggregate` serves both as the Aggregate Root and, effectively, as the a
 It manages not only the state of a social media post but also operations related to it like comments and likes, handled directly through methods and local collections.
 
 ###### Role of `PostAggregate` in the Domain Model
-t plays the dual role of being both the manager of the aggregate and the primary entity within it. This is common in simpler domain models or when a domain entity has limited relationships or complexity.
+It plays the dual role of being both the manager of the aggregate and the primary entity within it. This is common in simpler domain models or when a domain entity has limited relationships or complexity.
 
 ###### Lack of Additional Entities
 There are no other domain entities that are part of the `PostAggregate` beyond basic data attributes and behaviors, making it effectively the aggregate in its entirety.

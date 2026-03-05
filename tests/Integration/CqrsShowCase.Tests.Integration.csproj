@@ -26,6 +26,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\CqrsShowCase\Core\CqrsShowCase.Core.csproj"/>
     <ProjectReference Include="..\..\src\CqrsShowCase\Infrastructure\CqrsShowCase.Infrastructure.csproj"/>
+    <ProjectReference Include="..\..\src\CqrsShowCase\UserInterface\QueryApi\CqrsShowCase.UserInterface.QueryApi.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Infrastructure\Messaging\Config\*.config">
