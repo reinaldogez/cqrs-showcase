@@ -12,9 +12,10 @@ In this showcase project, I will design and implement a social media post micros
 - [CQRS Showcase](#cqrs-showcase)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
-    - [Set Kafka Topic Name as Environment Variable](#set-kafka-topic-name-as-environment-variable)
+    - [Configure Local Development Secrets](#configure-local-development-secrets)
     - [Run Apache Kafka with Docker Compose](#run-apache-kafka-with-docker-compose)
-    - [Set SQL Server Password as Environment Variable](#set-sql-server-password-as-environment-variable)
+    - [Run MongoDB with Docker Compose](#run-mongodb-with-docker-compose)
+    - [Run MS SQL Server with Docker Compose](#run-ms-sql-server-with-docker-compose)
     - [Creating .env File for Docker Compose](#creating-env-file-for-docker-compose)
   - [Usage](#usage)
   - [Domain-Driven Design](#domain-driven-design)
@@ -47,6 +48,11 @@ In this showcase project, I will design and implement a social media post micros
       - [Role of Mediator](#role-of-mediator)
       - [Concrete Implementation](#concrete-implementation)
     - [Benefits](#benefits)
+  - [Query Side](#query-side)
+    - [Query API](#query-api)
+    - [Query Handlers](#query-handlers)
+    - [Read Model Repositories](#read-model-repositories)
+  - [CI/CD](#cicd)
   - [Synchronization](#synchronization)
   - [Troubleshooting](#troubleshooting)
 
@@ -54,12 +60,35 @@ In this showcase project, I will design and implement a social media post micros
 
 Instructions for installing the project.
 
-### Set Kafka Topic Name as Environment Variable
+### Configure Local Development Secrets
 
-Open a powershell terminal in as Administrator and run the following command:
-```ps1
-setx KAFKA_TOPIC "SocialMediaSyncQueueEvents"
+Create an `appsettings.Development.json` file alongside the existing `appsettings.json` in each project you want to run locally. This file is excluded from git and holds your local credentials.
+
+**QueryApi** (`src/CqrsShowCase/UserInterface/QueryApi/appsettings.Development.json`):
+```json
+{
+  "ConnectionStrings": {
+    "SqlServer": "Server=localhost,1433;Database=SocialMediaPost;User Id=sa;Password=YourStrongPasswordHere;TrustServerCertificate=True;"
+  },
+  "Kafka": {
+    "BootstrapServers": "localhost:29092",
+    "GroupId": "cqrs-query-consumer",
+    "Topic": "SocialMediaPostEvents"
+  }
+}
 ```
+
+**Integration Tests** (`tests/Integration/appsettings.Development.json`):
+```json
+{
+  "ConnectionStrings": {
+    "SqlServer": "Server=localhost,1433;Database=SocialMediaPostTest;User Id=sa;Password=YourStrongPasswordHere;TrustServerCertificate=True;"
+  }
+}
+```
+
+Replace `YourStrongPasswordHere` with the same password used in the `.env` file for Docker Compose.
+
 ### Run Apache Kafka with Docker Compose
 
 Open a powershell terminal in as Administrator and run the following command:
@@ -67,11 +96,16 @@ Open a powershell terminal in as Administrator and run the following command:
 docker-compose -f docker-compose-apache-kafka.yaml up -d
 ```
 
-### Set SQL Server Password as Environment Variable
+### Run MongoDB with Docker Compose
 
-Open a powershell terminal in as Administrator and run the following command:
 ```ps1
-setx SQLSERVER_PASSWORD "YourStrongPasswordHere"
+docker-compose -f docker-compose-mongo-db.yaml up -d
+```
+
+### Run MS SQL Server with Docker Compose
+
+```ps1
+docker-compose -f docker-compose-ms-sql.yaml up -d
 ```
 
 ### Creating .env File for Docker Compose
@@ -305,7 +339,9 @@ While not currently implemented in the project, snapshots are a powerful optimiz
 
 ### Colleagues in the Mediator Pattern
 
-In this project, each API controller and its corresponding command handler are considered colleagues through their relationship mediated by MediatR. Controllers send commands to MediatR, which then routes these commands to the appropriate handlers. Each handler processes the command, executing specific business logic without needing to know which controller issued the command. This ensures that controllers and handlers are decoupled and communicate indirectly through MediatR, maintaining a clean separation that enhances maintainability and flexibility.
+In this project, each API controller and its corresponding handler are considered colleagues through their relationship mediated by MediatR. Controllers send commands or queries to MediatR, which then routes them to the appropriate handlers. Each handler processes the request, executing specific business logic without needing to know which controller issued it. This ensures that controllers and handlers are decoupled and communicate indirectly through MediatR, maintaining a clean separation that enhances maintainability and flexibility.
+
+On the command side, `EditCommentController` sends an `EditCommentCommand` through MediatR, which routes it to `EditCommentCommandHandler`. On the query side, `PostQueryController` sends query objects such as `FindAllPostsQuery` through the same MediatR pipeline, which routes them to the corresponding query handlers like `FindAllPostsQueryHandler`. Both sides benefit from the same decoupling — controllers never reference handlers directly.
 
 
 ### Implementation
@@ -340,7 +376,24 @@ As a mediator, MediatR also simplifies the interactions between components, mana
   }
 ```
 
-- **API Controllers**: This code snippet shows how the API controller (the sender) is decoupled from the command handlers.
+- **Query Handlers**: On the read side, query handlers follow the same pattern. They implement `IRequestHandler` for query objects and delegate to read model repositories.
+
+```csharp
+  public class FindAllPostsQueryHandler : IRequestHandler<FindAllPostsQuery, List<PostEntity>>
+  {
+      private readonly IPostRepository _postRepository;
+
+      public FindAllPostsQueryHandler(IPostRepository postRepository)
+      {
+          _postRepository = postRepository;
+      }
+
+      public async Task<List<PostEntity>> Handle(FindAllPostsQuery request, CancellationToken cancellationToken)
+          => await _postRepository.ListAllAsync();
+  }
+```
+
+- **API Controllers**: On the command side, this code snippet shows how the API controller (the sender) is decoupled from the command handlers.
 
 ```csharp
 [ApiController]
@@ -375,6 +428,32 @@ public class EditCommentController : ControllerBase
 }
 ```
 
+On the query side, `PostQueryController` uses the same approach to dispatch queries:
+
+```csharp
+[ApiController]
+[Route("api/v1/[controller]")]
+public class PostQueryController : ControllerBase
+{
+    private readonly IMediator _mediator;
+    private readonly ILogger<PostQueryController> _logger;
+
+    public PostQueryController(IMediator mediator, ILogger<PostQueryController> logger)
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllPostsAsync()
+    {
+        var posts = await _mediator.Send(new FindAllPostsQuery());
+
+        // Response handling is included in the actual implementation
+    }
+}
+```
+
 
 ### Benefits
 
@@ -385,9 +464,55 @@ public class EditCommentController : ControllerBase
 - **Scalability**: New handlers can be easily added and integrated into the existing infrastructure as the application grows.
 
 
+## Query Side
+
+The query side of CQRS is responsible for reading data from a denormalized read model optimized for fast retrieval. In this project, the query side is implemented as a separate ASP.NET Core Web API (`QueryApi`) that queries a SQL Server database containing projected views of the domain data.
+
+### Query API
+
+The `PostQueryController` exposes REST endpoints at `api/v1/PostQuery` for retrieving post data from the read model. All endpoints are GET operations that dispatch query objects through MediatR to their corresponding handlers:
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/v1/PostQuery` | Retrieve all posts |
+| `GET /api/v1/PostQuery/byId/{postId}` | Retrieve a single post by its ID |
+| `GET /api/v1/PostQuery/byAuthor/{author}` | Retrieve posts by author name |
+| `GET /api/v1/PostQuery/withComments` | Retrieve posts that have comments |
+| `GET /api/v1/PostQuery/withLikes/{numberOfLikes}` | Retrieve posts with a minimum number of likes |
+
+Each endpoint returns an HTTP 200 OK with a `PostQueryResponse` containing the matching posts, an HTTP 204 No Content when no results are found, or an HTTP 500 Internal Server Error with a safe error message that does not expose internal details.
+
+### Query Handlers
+
+Query handlers are located in the Infrastructure layer and implement MediatR's `IRequestHandler` interface. Each handler receives a query object and delegates to the appropriate repository method:
+
+- `FindAllPostsQueryHandler` — returns all posts via `IPostRepository.ListAllAsync()`
+- `FindPostByIdQueryHandler` — returns a single post via `IPostRepository.GetByIdAsync()`
+- `FindPostsByAuthorQueryHandler` — returns posts matching an author substring via `IPostRepository.ListByAuthorAsync()`
+- `FindPostsWithCommentsQueryHandler` — returns posts that have comments via `IPostRepository.ListWithCommentsAsync()`
+- `FindPostsWithLikesQueryHandler` — returns posts with a minimum number of likes via `IPostRepository.ListWithLikesAsync()`
+
+### Read Model Repositories
+
+The read model repositories (`PostRepository` and `CommentRepository`) query the SQL Server database using Entity Framework Core. Read operations use `AsNoTracking()` to avoid the overhead of change tracking, since the query side only reads data and never modifies it directly. The `PostRepository` supports filtering by author, likes count, and comment presence, while `CommentRepository` provides basic CRUD operations for comment projections.
+
+## CI/CD
+
+This project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs on every push and pull request to `master`. The pipeline starts SQL Server, MongoDB and Kafka as Docker services and runs unit and integration tests.
+
+To enable the pipeline, add the following secret to your repository under **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|---|---|
+| `SQLSERVER_PASSWORD` | SA password for the SQL Server container |
+
+The Kafka topic defaults to `SocialMediaPostEvents` and can be overridden with the `KAFKA_TOPIC` repository variable.
+
 ## Synchronization
 
 I created this topic on the discussion tab [Updating Read Databases in a CQRS Architecture](https://github.com/reinaldogez/cqrs-showcase/discussions/1), where the main options are deeply discussed.
+
+In this project, synchronization between the command side and the query side is achieved through Apache Kafka. When the command side persists events to the MongoDB event store, it also publishes them to a Kafka topic via `EventProducer`. On the query side, `ConsumerHostedService` runs as a background service within the QueryApi application, continuously consuming events from the Kafka topic. Each consumed event is deserialized and dispatched to `EventHandler`, which projects the domain events into the denormalized SQL Server read model by creating, updating, or deleting posts and comments accordingly. This approach ensures eventual consistency between the write and read databases without coupling them directly.
 
 ## Troubleshooting
 

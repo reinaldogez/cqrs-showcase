@@ -360,4 +360,4 @@ MigrationBackup/
 .ionide/
 
 # Development secrets - never commit passwords
-appsettings.Development.json
+**/appsettings.Development.json
