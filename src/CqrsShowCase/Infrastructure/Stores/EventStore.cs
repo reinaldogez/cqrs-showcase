@@ -5,6 +5,7 @@ using CqrsShowCase.Core.Events;
 using CqrsShowCase.Core.Exceptions;
 using CqrsShowCase.Core.Infrascructure;
 using CqrsShowCase.Core.Producers;
+using Microsoft.Extensions.Configuration;
 
 namespace CqrsShowCase.Infrastructure.Stores;
 
@@ -14,10 +15,13 @@ public class EventStore : IEventStore
 
     private readonly IEventProducer _eventProducer;
 
-    public EventStore(IEventStoreRepository eventStoreRepository, IEventProducer eventProducer)
+    private readonly string _kafkaTopic;
+
+    public EventStore(IEventStoreRepository eventStoreRepository, IEventProducer eventProducer, IConfiguration configuration)
     {
         _eventStoreRepository = eventStoreRepository;
         _eventProducer = eventProducer;
+        _kafkaTopic = configuration["Kafka:Topic"] ?? "SocialMediaPostEvents";
     }
 
     public async Task<List<BaseEvent>> GetEventsAsync(Guid aggregateId)
@@ -56,8 +60,7 @@ public class EventStore : IEventStore
 
             await _eventStoreRepository.SaveAsync(eventModel);
 
-            string topicName = Environment.GetEnvironmentVariable("KAFKA_TOPIC", EnvironmentVariableTarget.User);
-            await _eventProducer.ProduceAsync(topicName, @event);
+            await _eventProducer.ProduceAsync(_kafkaTopic, @event);
         }
     }
 }

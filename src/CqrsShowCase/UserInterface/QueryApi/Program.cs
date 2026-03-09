@@ -64,15 +64,9 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run();
 
-string GetConnectionString(IConfiguration configuration)
-{
-    var template = configuration.GetConnectionString("SqlServer")
+string GetConnectionString(IConfiguration configuration) =>
+    configuration.GetConnectionString("SqlServer")
         ?? throw new InvalidOperationException("SqlServer connection string not configured.");
-    var password = Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD", EnvironmentVariableTarget.User)
-        ?? Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD")
-        ?? throw new InvalidOperationException("SQLSERVER_PASSWORD environment variable not set.");
-    return template.Replace("{PASSWORD}", password);
-}
 
 // Required so integration tests can reference the Program type via WebApplicationFactory<Program>.
 // With top-level statements the compiler generates an implicit internal Program class, and this

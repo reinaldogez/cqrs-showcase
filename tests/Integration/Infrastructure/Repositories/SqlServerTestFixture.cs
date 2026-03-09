@@ -22,17 +22,12 @@ public class SqlServerTestFixture : IAsyncLifetime, IDisposable
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
 
-            var template = configuration.GetConnectionString("SqlServer")
-                ?? throw new InvalidOperationException("SqlServer connection string not configured in appsettings.json.");
-
-            var password = Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD", EnvironmentVariableTarget.User)
-                ?? Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD")
-                ?? throw new InvalidOperationException("SQLSERVER_PASSWORD environment variable not set.");
-
-            var connectionString = template.Replace("{PASSWORD}", password);
+            var connectionString = configuration.GetConnectionString("SqlServer")
+                ?? throw new InvalidOperationException("SqlServer connection string not configured.");
 
             ContextFactory = new DatabaseContextFactory(
                 o => o.UseSqlServer(connectionString));

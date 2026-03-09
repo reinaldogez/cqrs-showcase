@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using CqrsShowCase.Infrastructure.Data.MsSqlServer.DataAccess;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -17,14 +16,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureAppConfiguration((context, config) =>
         {
-            config.AddInMemoryCollection(new Dictionary<string, string>
-            {
-                ["ConnectionStrings:SqlServer"] =
-                    "Server=localhost,1433;Database=SocialMediaPostTestApi;User Id=sa;Password={PASSWORD};TrustServerCertificate=True;"
-            });
+            config.AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
         });
 
-        builder.ConfigureServices(services =>
+        builder.ConfigureServices((context, services) =>
         {
             services.RemoveAll<IHostedService>();
 
@@ -33,12 +28,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<DatabaseContext>();
             services.RemoveAll<DatabaseContextFactory>();
 
-            var password = Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD", EnvironmentVariableTarget.User)
-                ?? Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD")
-                ?? throw new InvalidOperationException("SQLSERVER_PASSWORD environment variable not set.");
+            var baseCs = context.Configuration.GetConnectionString("SqlServer")
+                ?? throw new InvalidOperationException("SqlServer connection string not configured.");
 
-            var connectionString =
-                $"Server=localhost,1433;Database=SocialMediaPostTestApi;User Id=sa;Password={password};TrustServerCertificate=True;";
+            // Use a dedicated test API database to isolate from the repository integration tests
+            var connectionString = baseCs.Replace("SocialMediaPostTest;", "SocialMediaPostTestApi;");
 
             Action<DbContextOptionsBuilder> configureDbContext = o => o
                 .UseSqlServer(connectionString);

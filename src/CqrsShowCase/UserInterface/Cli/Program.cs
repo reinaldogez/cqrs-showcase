@@ -53,6 +53,8 @@ IConfiguration BuildConfiguration()
     return new ConfigurationBuilder()
         .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
         .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables()
         .Build();
 }
 
@@ -91,12 +93,9 @@ async void ConfigureServices(IServiceCollection services, IConfiguration configu
 
 }
 
-string GetDatabaseConnectionString(IConfiguration configuration)
-{
-    var connectionStringTemplate = configuration.GetConnectionString("SqlServer");
-    var password = Environment.GetEnvironmentVariable("SQLSERVER_PASSWORD", EnvironmentVariableTarget.User);
-    return connectionStringTemplate.Replace("{PASSWORD}", password);
-}
+string GetDatabaseConnectionString(IConfiguration configuration) =>
+    configuration.GetConnectionString("SqlServer")
+        ?? throw new InvalidOperationException("SqlServer connection string not configured.");
 
 async Task TestDatabaseConnection(IServiceProvider serviceProvider)
 {
@@ -156,7 +155,7 @@ async void StartKafka()
     {
         var eventConsumer = serviceProvider.GetRequiredService<IEventConsumer>();
 
-        string topicName = Environment.GetEnvironmentVariable("KAFKA_TOPIC", EnvironmentVariableTarget.User);
+        string topicName = builder["Kafka:Topic"] ?? "SocialMediaPostEvents";
         consumerTask = Task.Run(() => eventConsumer.Consume(topicName, cts.Token));
         var eventStore = serviceProvider.GetRequiredService<IEventStore>();
         CreateAndPostEventOnEventStore(eventStore);
