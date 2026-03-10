@@ -88,4 +88,5 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Run integration tests
-        run: dotnet test tests/Integration --no-build
+        run: dotnet test --no-build
+        working-directory: tests/Integration
