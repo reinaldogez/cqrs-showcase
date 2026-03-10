@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Confluent.Kafka;
 using Xunit;
@@ -19,8 +20,9 @@ public class KafkaTestServerFixture : IAsyncLifetime, IDisposable
         try
         {
             var services = new ServiceCollection();
-            ProducerConfig configProducer = await ConfigFiles.LoadConfig<ProducerConfig>("Infrastructure\\Messaging\\Config\\kafkaproducer.config");
-            ConsumerConfig configConsumer = await ConfigFiles.LoadConfig<ConsumerConfig>("Infrastructure\\Messaging\\Config\\kafkaconsumer.config");
+            var configDir = Path.Combine("Infrastructure", "Messaging", "Config");
+            ProducerConfig configProducer = await ConfigFiles.LoadConfig<ProducerConfig>(Path.Combine(configDir, "kafkaproducer.config"));
+            ConsumerConfig configConsumer = await ConfigFiles.LoadConfig<ConsumerConfig>(Path.Combine(configDir, "kafkaconsumer.config"));
             if (configProducer == null || configConsumer == null)
             {
                 throw new Exception($"An error occurred while reading the Kafka configuration files.");
