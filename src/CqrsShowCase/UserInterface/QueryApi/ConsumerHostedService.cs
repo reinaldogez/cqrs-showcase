@@ -10,9 +10,7 @@ public class ConsumerHostedService : BackgroundService
     public ConsumerHostedService(IServiceScopeFactory scopeFactory, IConfiguration configuration)
     {
         _scopeFactory = scopeFactory;
-        _topic = Environment.GetEnvironmentVariable("KAFKA_TOPIC")
-                 ?? configuration["Kafka:Topic"]
-                 ?? "SocialMediaPostEvents";
+        _topic = configuration["Kafka:Topic"] ?? "SocialMediaPostEvents";
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
