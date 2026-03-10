@@ -8,7 +8,8 @@ public static class ConfigFiles
     {
         try
         {
-            var configDictionary = (await File.ReadAllLinesAsync(configPath))
+            var fullPath = Path.IsPathRooted(configPath) ? configPath : Path.Combine(AppContext.BaseDirectory, configPath);
+            var configDictionary = (await File.ReadAllLinesAsync(fullPath))
                 .Where(line => !line.StartsWith("#"))
                 .ToDictionary(
                     line => line.Substring(0, line.IndexOf('=')),
